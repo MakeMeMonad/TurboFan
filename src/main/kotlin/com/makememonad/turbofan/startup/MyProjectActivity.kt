@@ -1,4 +1,4 @@
-package com.github.makememonad.turbofan.startup
+package com.makememonad.turbofan.startup
 
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project

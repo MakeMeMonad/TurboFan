@@ -11,5 +11,16 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.makememonad.turbofan.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
         <postStartupActivity implementation="com.github.makememonad.turbofan.startup.MyProjectActivity" />
+        <fileType
+                name="Swift File"
+                implementationClass="com.github.makememonad.turbofan.language.swift.SwiftFileType"
+                fieldName="INSTANCE"
+                language="swift"
+                extensions="swift;swiftinterface"
+                fileNames="Package.swift"
+                fileNamesCaseInsensitive="Package.swift;Package.Resolved"
+                patterns="*.swift;*.swiftinterface"
+                hashBangs=""
+        />
     </extensions>
 </idea-plugin>

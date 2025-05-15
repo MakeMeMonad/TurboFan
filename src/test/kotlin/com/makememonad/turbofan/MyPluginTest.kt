@@ -1,4 +1,4 @@
-package com.github.makememonad.turbofan
+package com.makememonad.turbofan
 
 import com.intellij.ide.highlighter.XmlFileType
 import com.intellij.openapi.components.service

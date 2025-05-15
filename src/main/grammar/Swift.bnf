@@ -1,0 +1,52 @@
+// Swift Language Grammar for CLion Plugin
+
+// Header attributes - you'll fill these in later to configure generation
+// {
+//   parserClass="com.makememonad.turbofan.language.swift.parser.SwiftParser"
+//   lexerClass="com.makememonad.turbofan.language.swift.lexer.SwiftLexer"
+//   // ... other options
+// }
+
+// Define the tokens for Swift.
+// The patterns for these tokens will be defined in Swift.flex
+tokens {
+  // Keywords - list all Swift keywords here by name
+  LET="LET"
+  VAR="VAR"
+  FUNC="FUNC"
+  IF="IF"
+  ELSE="ELSE"
+  CLASS="CLASS"
+  STRUCT="STRUCT"
+  ENUM="ENUM"
+
+  // Operators - list common operators by name
+  PLUS="PLUS"
+  MINUS="MINUS"
+  STAR="STAR"
+  DIV="DIV"
+  EQ="EQ"
+
+  // Punctuation - list common punctuation by name
+  LPAREN="LPAREN"
+  RPAREN="RPAREN"
+  LBRACE="LBRACE"
+  RBRACE="RBRACE"
+  LBRACKET="LBRACKET"
+  RBRACKET="RBRACKET"
+  DOT="DOT"
+  COMMA="COMMA"
+  COLON="COLON"
+  SEMICOLON="SEMICOLON"
+
+  // Identifiers, Literals, Comments, Whitespace - list by name
+  IDENTIFIER="IDENTIFIER"
+  INTEGER_LITERAL="INTEGER_LITERAL"
+  STRING_LITERAL="STRING_LITERAL"
+  SINGLE_LINE_COMMENT="SINGLE_LINE_COMMENT"
+  MULTI_LINE_COMMENT="MULTI_LINE_COMMENT"
+  WHITE_SPACE="WHITE_SPACE"
+}
+
+// No grammar rules yet. We'll add those after getting the lexer defined.
+// file ::= ...

@@ -1,4 +1,4 @@
-package com.github.makememonad.turbofan
+package com.makememonad.turbofan
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls

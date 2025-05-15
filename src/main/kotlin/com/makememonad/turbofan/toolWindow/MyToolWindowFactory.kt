@@ -1,4 +1,4 @@
-package com.github.makememonad.turbofan.toolWindow
+package com.makememonad.turbofan.toolWindow
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
