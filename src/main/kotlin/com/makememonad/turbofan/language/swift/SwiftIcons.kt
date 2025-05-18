@@ -3,5 +3,5 @@ package com.makememonad.turbofan.language.swift
 import com.intellij.openapi.util.IconLoader
 
 object SwiftIcons {
-@JvmField val Icon= IconLoader.getIcon("/icons/swift.png", javaClass)
+@JvmField val SwiftFileIcon= IconLoader.getIcon("/icons/swift.svg", javaClass)
 }

@@ -1,7 +1,32 @@
+// Swift Language JFlex for CLion Plugin
+// BEGIN FILE Swift.flex
+
+// Reference Links:
+// https://docs.swift.org/swift-book/documentation/the-swift-programming-language/aboutthelanguagereference/
+// https://docs.swift.org/swift-book/documentation/the-swift-programming-language/lexicalstructure/
+// https://docs.swift.org/swift-book/documentation/the-swift-programming-language/summaryofthegrammar/
+// Above references are:
+// Copyright © 2014–2023 Apple Inc. and the Swift project authors. All rights reserved.
+   //
+   //This document is made available under a Creative Commons Attribution 4.0 International (CC BY 4.0) License.
+   //
+   //Swift and the Swift logo are trademarks of Apple Inc.
+//
+// https://www.jflex.de/manual.html
+// Above reference is:
+	// The Fast Lexical Analyser Generator
+	// Copyright © 1998–2020 by Gerwin Klein, Steve Rowe, and Régis Décamps.
+	// Version 1.9.1, 11 March 2023
+	// JFlex is free software, published under a BSD-style license.
+	// © JFlex Team. Website text licensed under Creative Commons Attribution-NonCommercial-ShareAlike
+//
+//
+//
+
+		// --- JFlex Section 1: USERCODE
+// The text up to the second section is copied verbatim to the top of the generated lexer class (before the actual class declaration).
 package com.makememonad.turbofan.language.swift.psi.lexer;
 
-// JFlex Section One: USERCODE
-// The text up to the second section is copied verbatim to the top of the generated lexer class (before the actual class declaration).
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import static com.intellij.psi.TokenType.BAD_CHARACTER;
@@ -10,23 +35,29 @@ import static com.intellij.psi.TokenType.WHITE_SPACE;
 // import static com.makememonad.turbofan.language.swift.psi.SwiftTypes.*
 
 %%
-      // JFlex Section Two: Option Switches, Macros, and Declarations
+		// --- JFlex Section 2: OPTIONS, CUSTOM CODE, MACRO DECLARATIONS
+	// JFlex Scanner Option Switches:
 %class SwiftLexer
 %implements FlexLexer
 %unicode
 %function advance
 %type IElementType
-      // The code between the %eof{ and %eof} is ...
+	// JFlex End-of-File/End-of-Stream Custom Code:
+		// The code between the %eof{ and %eof} is executed at the end of each input stream from the file/buffer it's given
 %eof{  return;
 %eof}
-      // The code between %{ and %} is copied verbatim into the generated lexer class source.
-      // Member variables and functions to be used inside scanner actions.
+	// JFlex Scanner Custom Code:
+		// The code between %{ and %} is copied verbatim into the generated lexer class source.
+		// Member variables and functions to be used inside scanner actions.
 %{
-private java.util.Stack<Integer> stateStack = new java.util.Stack<>();
-private int commentNestingDepth = 0;
-private int currentExtendedDelimiterLength = 0;
+  private java.util.Stack<Integer> stateStack = new java.util.Stack<>();
+  private int currentExtendedDelimiterLength = 0;
 %}
-	// Macro Declarations:
+	// JFlex Constructor Custom Code:
+%init{
+  this.stateStack.push(YYINITIAL);
+%init}
+		// --- JFlex MACRO DECLARATIONS
 LineTerm = \R
 inlineSp =  [\u0009 \u0020]
 SwiftLineBr = \u000A | \u000D | \u000D\u000A
@@ -53,8 +84,8 @@ DecimalExponent = {FloatingPointE} {Sign}? {DecimalDigitsWithUnderscores}
 HexFraction = \. {HexDigitsWithUnderscores}
 HexExponent = {FloatingPointP} {Sign}? {DecimalDigitsWithUnderscores}
 
-	// --- String Literal Macro Declarations ---
-      // Escape sequences (character patterns for the escapes). The patterns *after* the backslash
+	// String Literal Macros:
+	// Escape sequences (character patterns for the escapes). The patterns *after* the backslash
 EscapeSequence0       = "0"
 EscapeSequenceBackslash = "\\"
 EscapeSequenceT       = "t"
@@ -67,86 +98,184 @@ UnicodeScalarDigits = {HexDigit}{1,8}
 EscapeSequenceUnicode = [uU] "{" {UnicodeScalarDigits} "}"
 AnyEscapedCharacterPattern = {EscapeSequence0} | {EscapeSequenceBackslash} | {EscapeSequenceT} | {EscapeSequenceN} | {EscapeSequenceR} | {EscapeSequenceQuote} | {EscapeSequenceApostrophe} | {EscapeSequenceUnicode}
 EscapedNewlinePattern = \\ {inlineSp}* {LineTerm}
-QuotedTextItemPattern_SingleLine = [^"\\\u000A\u000D]
-MultilineQuotedTextItemPattern_Basic = [^\\"]+
-		// You need to handle sequences like \" and \\\ within multiline content too.
-		// And prevent matching """ unless it's the end delimiter. This will be tricky with regex alone.
-
-		// Interpolated text items: \( expression ) | quoted-text-item
-		// The \( ... ) part requires parser coordination. The quoted-text-item depends on the string type.
-
-		// Matches one or more '#' characters
+    // TODO: Check formatting and escaping of this rule... Specifically the escaped literal double-quote...
+    //  IDE says syntax error when not escaped. JFlex may want not escaped...
+QuotedTextItemPattern_SingleLine = [^\u000A\u000D\"\\]
+MultilineQuotedTextItemPattern_Basic = [^\\]+
 ExtendedDelimiter = #+
 
-	// --- Identifier Character Macro Declarations ---
-		// Based on Swift Language Reference -> Lexical Structure -> Identifiers
-		// Unicode ranges specified by Swift for identifier-head beyond basic ASCII
-IdentifierHeadBasicASCII = [A-Za-z_]
-IdentifierHeadUnicodeRanges = [\u00A8\u00AA\u00AD\u00AF\u00B2-\u00B5\u00B7-\u00BA\u00BC-\u00BE\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\u02FF\u0370-\u167F\u1681-\u180D\u180F-\u1DBF\u1E00-\u1FFF\u200B-\u200D\u202A-\u202E\u203F-\u2040\u2054\u2060-\u206F\u2070-\u20CF\u2100-\u218F\u2460-\u24FF\u2776-\u2793\u2C00-\u2DFF\u2E80-\u2FFF\u3004-\u3007\u3021-\u302F\u3031-\u303F\u3040-\uD7FF\uF900-\uFD3D\uFD40-\uFDCF\uFDF0-\uFE1F\uFE30-\uFE44\uFE47-\uFFFD]
-		// Additionally, characters outside BMP not in Private Use Area - tricky, can use properties
-		// BMP ranges match \p{L} \p{Nl} etc. Adding \p{L} \p{Nl} might simplify or expand coverage
-IdentifierHead = {IdentifierHeadBasicASCII} | {IdentifierHeadUnicodeRanges} | [\p{L}\p{Nl}]
-		// Note: The full set is complex; this is a strong approximation using properties and listed ranges.
-		// Private Use Area characters are in ranges like U+E000..U+F8FF (BMP), U+F0000..U+FFFFD (Suppl. Private Use A), U+100000..U+10FFFD (Suppl. Private Use B).
-		// Excluding these explicitly is needed if properties aren't enough: \P{Co}
+		// IDENTIFIER GRAMMAR SPEC 6.1
 
-		// identifier-character:
+//
+//		Grammar of an identifier
+//        identifier → identifier-head identifier-characters?
+//        identifier → ` identifier-head identifier-characters? `
+//        identifier → implicit-parameter-name
+//        identifier → property-wrapper-projection
+//        identifier-list → identifier | identifier , identifier-list
+//        identifier-head → Upper- or lowercase letter A through Z
+//        identifier-head → _
+//        identifier-head → U+00A8, U+00AA, U+00AD, U+00AF, U+00B2–U+00B5, or U+00B7–U+00BA
+//        identifier-head → U+00BC–U+00BE, U+00C0–U+00D6, U+00D8–U+00F6, or U+00F8–U+00FF
+//        identifier-head → U+0100–U+02FF, U+0370–U+167F, U+1681–U+180D, or U+180F–U+1DBF
+//        identifier-head → U+1E00–U+1FFF
+//        identifier-head → U+200B–U+200D, U+202A–U+202E, U+203F–U+2040, U+2054, or U+2060–U+206F
+//        identifier-head → U+2070–U+20CF, U+2100–U+218F, U+2460–U+24FF, or U+2776–U+2793
+//        identifier-head → U+2C00–U+2DFF or U+2E80–U+2FFF
+//        identifier-head → U+3004–U+3007, U+3021–U+302F, U+3031–U+303F, or U+3040–U+D7FF
+//        identifier-head → U+F900–U+FD3D, U+FD40–U+FDCF, U+FDF0–U+FE1F, or U+FE30–U+FE44
+//        identifier-head → U+FE47–U+FFFD
+//        identifier-head → U+10000–U+1FFFD, U+20000–U+2FFFD, U+30000–U+3FFFD, or U+40000–U+4FFFD
+//        identifier-head → U+50000–U+5FFFD, U+60000–U+6FFFD, U+70000–U+7FFFD, or U+80000–U+8FFFD
+//        identifier-head → U+90000–U+9FFFD, U+A0000–U+AFFFD, U+B0000–U+BFFFD, or U+C0000–U+CFFFD
+//        identifier-head → U+D0000–U+DFFFD or U+E0000–U+EFFFD
+//        identifier-character → Digit 0 through 9
+//        identifier-character → U+0300–U+036F, U+1DC0–U+1DFF, U+20D0–U+20FF, or U+FE20–U+FE2F
+//        identifier-character → identifier-head
+//        identifier-characters → identifier-character identifier-characters?
+//        implicit-parameter-name → $ decimal-digits
+//        property-wrapper-projection → $ identifier-characters
+
+	// Identifier Character Macros:
+IdentifierHeadBasicASCII = [A-Za-z_]
+	// Matched to Swift 6.1 specification.
+		// The below format is structurally matched with the Swift Lang Reference's structure.
+		// While condensing the ranges and using exclusions to save space is certainly possible, I'm gonna keep this format.
+		// I believe this will enable easier maintenance upon language spec updates, and make it easier to cross-check with the reference.
+
+		// One, Two: Latin supplement and spacing modifiers. Three, Four: Latin Ext, Greek, etc.
+		// Five: General Punc/Format.
+		// Six: SuperScript, SubScript, LetterlikeSymbols, Dingbats, whatnot.
+		// Seven, Eight, Nine: Glagolitic, CJK, Rads, Ideographs, Compat, Arabic Forms, etc.
+		// Ten: Specials and Replacement.
+IHUR_BMP_1 = [\u00A8\u00AA\u00AD\u00AF\u00B2-\u00B5\u00B7-\u00BA]
+IHUR_BMP_2 = [\u00BC-\u00BE\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]
+IHUR_BMP_3 = [\u0100-\u02FF\u0370-\u167F\u1681-\u180D\u180F-\u1DBF]
+IHUR_BMP_4 = [\u1E00-\u1FFF]
+IHUR_BMP_5 = [\u200B-\u200D\u202A-\u202E\u203F-\u2040\u2054\u2060-\u206F]
+IHUR_BMP_6 = [\u2070-\u20CF\u2100-\u218F\u2460-\u24FF\u2776-\u2793]
+IHUR_BMP_7 = [\u2C00-\u2DFF\u2E80-\u2FFF]
+IHUR_BMP_8 = [\u3004-\u3007\u3021-\u302F\u3031-\u303F\u3040-\uD7FF]
+IHUR_BMP_9 = [\uF900-\uFD3D\uFD40-\uFDCF\uFDF0-\uFE1F\uFE30-\uFE44]
+IHUR_BMP_10 = [\uFE47-\uFFFD]
+		// Supplementary Plane Groups (using \u{XXXXX} syntax)
+		// Eleven-Fourteen: Supplement Plane Groups 1-4
+IHUR_SPG_1 = [\u{10000}-\u{1FFFD}\u{20000}-\u{2FFFD}\u{30000}-\u{3FFFD}\u{40000}-\u{4FFFD}]
+IHUR_SPG_2 = [\u{50000}-\u{5FFFD}\u{60000}-\u{6FFFD}\u{70000}-\u{7FFFD}\u{80000}-\u{8FFFD}]
+IHUR_SPG_3 = [\u{90000}-\u{9FFFD}\u{A0000}-\u{AFFFD}\u{B0000}-\u{BFFFD}\u{C0000}-\u{CFFFD}]
+IHUR_SPG_4 = [\u{D0000}-\u{DFFFD}\u{E0000}-\u{EFFFD}]
+		// Final combined ranges, matched to Swift 6.1 Specification
+IdentifierHeadUnicodeRanges = {IHUR_BMP_1} | {IHUR_BMP_2} | {IHUR_BMP_3} | {IHUR_BMP_4} | \
+                              {IHUR_BMP_5} | {IHUR_BMP_6} | {IHUR_BMP_7} | {IHUR_BMP_8} | \
+                              {IHUR_BMP_9} | {IHUR_BMP_10} | \
+                              {IHUR_SPG_1} | {IHUR_SPG_2} | {IHUR_SPG_3} | {IHUR_SPG_4}
+
+IdentifierHead = {IdentifierHeadBasicASCII} | {IdentifierHeadUnicodeRanges}
 	IdentifierCharacterDigit = {DecimalDigit}
-	IdentifierCharacterCombining = [\u0300-\u036F\u1DC0-\u1DFF\u20D0-\u20FF\uFE20-\uFE2F] | [\p{Mn}\p{Mc}]
+	IdentifierCharacterCombining = [\u0300-\u036F\u1DC0-\u1DFF\u20D0-\u20FF\uFE20-\uFE2F]
 	IdentifierCharacterHead = {IdentifierHead}
 	IdentifierCharacter = {IdentifierCharacterDigit} | {IdentifierCharacterCombining} | {IdentifierCharacterHead}
 
-	// --- Operator Character Macro Declarations ---
-		// Based on Swift Language Reference -> Lexical Structure -> Operators
-		// Unicode ranges and properties specified by Swift for operator-head
-OperatorHeadASCII = [/=\-+\*%!<>&\\|^~?]
 
-OperatorHeadUnicodeRanges = [\u00A1-\u00A7\u00A9\u00AB\u00AC\u00AE\u00B0-\u00B1\u00B6\u00BB\u00BF\u00D7\u00F7\u2016-\u2017\u2020-\u2027\u2030-\u203E\u2041-\u2053\u2055-\u205E\u2190-\u23FF\u2500-\u2775\u2794-\u2BFF\u2E00-\u2E7F\u3001-\u3003\u3008-\u3020\u3030]
-		// Common Unicode properties for symbols (check overlap with ranges)
-		// Math Symbol, Modifier Symbol, Other Symbol, Dash Punctuation
-OperatorHeadUnicodeProperties = [\p{Sm}\p{Sk}\p{So}\p{Pd}]
-OperatorHead = {OperatorHeadASCII} | {OperatorHeadUnicodeRanges} | {OperatorHeadUnicodeProperties}
-		// Note: Again, check overlap and completeness vs. spec. Combining properties and ranges might be best.
 
-		// Combining Mark, Enclosing Mark, Variation Selector ranges from spec
-OperatorCharacterCombining = [\u0300-\u036F\u1DC0-\u1DFF\u20D0-\u20FF\uFE00-\uFE0F\uFE20-\uFE2F] | [\p{Mn}\p{Mc}\p{Me}]
+		// OPERATOR GRAMMAR SPEC 6.1
+
+//
+//Grammar of operators
+//operator → operator-head operator-characters?
+//operator → dot-operator-head dot-operator-characters
+//operator-head → / | = | - | + | ! | * | % | < | > | & | | | ^ | ~ | ?
+//operator-head → U+00A1–U+00A7
+//operator-head → U+00A9 or U+00AB
+//operator-head → U+00AC or U+00AE
+//operator-head → U+00B0–U+00B1
+//operator-head → U+00B6, U+00BB, U+00BF, U+00D7, or U+00F7
+//operator-head → U+2016–U+2017
+//operator-head → U+2020–U+2027
+//operator-head → U+2030–U+203E
+//operator-head → U+2041–U+2053
+//operator-head → U+2055–U+205E
+//operator-head → U+2190–U+23FF
+//operator-head → U+2500–U+2775
+//operator-head → U+2794–U+2BFF
+//operator-head → U+2E00–U+2E7F
+//operator-head → U+3001–U+3003
+//operator-head → U+3008–U+3020
+//operator-head → U+3030
+//operator-character → operator-head
+//operator-character → U+0300–U+036F
+//operator-character → U+1DC0–U+1DFF
+//operator-character → U+20D0–U+20FF
+//operator-character → U+FE00–U+FE0F
+//operator-character → U+FE20–U+FE2F
+//operator-character → U+E0100–U+E01EF
+//operator-characters → operator-character operator-characters?
+//dot-operator-head → .
+//dot-operator-character → . | operator-character
+//dot-operator-characters → dot-operator-character dot-operator-characters?
+//infix-operator → operator
+//prefix-operator → operator
+//postfix-operator → operator
+//
+
+	// Operator Character Macros:
+OperatorHeadASCII = [/=\-+\*%!<>&|\^~?]
+		// Split just for more manageability...
+OHUR_1 = [\u00A1-\u00A7\u00A9\u00AB\u00AC\u00AE\u00B0-\u00B1\u00B6\u00BB\u00BF\u00D7\u00F7]
+OHUR_2 = [\u2016-\u2017\u2020-\u2027\u2030-\u203E\u2041-\u2053\u2055-\u205E\u2190-\u23FF]
+OHUR_3 = [\u2500-\u2775\u2794-\u2BFF\u2E00-\u2E7F\u3001-\u3003\u3008-\u3020\u3030]
+		// Final Combined Ranges
+OperatorHeadUnicodeRanges = {OHUR_1} | {OHUR_2} | {OHUR_3}
+OperatorHead = {OperatorHeadASCII} | {OperatorHeadUnicodeRanges}
+
+		// One-Three: Standard Combining Marks?
+		// Four: Variation Selectors. Five: Combining Half_Marks. Six: Variation Selector Supplement.
+OCC_1_2_3 = [\u0300-\u036F\u1DC0-\u1DFF\u20D0-\u20FF]
+OCC_4 = [\uFE00-\uFE0F]
+OCC_5 = [\uFE20-\uFE2F]
+OCC_6 = [\u{E0100}-\u{E01EF}]
+OperatorCharacterCombining = {OCC_1_2_3} | {OCC_4} | {OCC_5} | {OCC_6}
 		// Any character valid as an operator head can also be an operator character
 OperatorCharacterHead = {OperatorHead}
 OperatorCharacter = {OperatorCharacterCombining} | {OperatorCharacterHead}
 DotOperatorHead = \.
 DotOperatorCharacter = \. | {OperatorCharacter}
 
-
-
-	// Lexical State Declarations:
+	// JFlex Lexical State Declarations:
 %xstate INITIAL
 %xstate STRING
 %xstate MULTILINE_STRING
-%xstate STRING_INTERPOLATION
 %xstate MULTILINE_COMMENT
 %xstate EXTENDED_STRING
 %xstate EXTENDED_MULTILINE_STRING
+%xstate REGEX_LITERAL
+%xstate EXTENDED_REGEX_LITERAL
+%xstate STRING_INTERPOLATION_MARKER
 
 %%
-	// --- JFlex Section Three: Lexical Rules ---
-		// Rules for <YYINITIAL> state
+		// --- JFlex Section Three: Lexical Rules
+
+	// Rules for <YYINITIAL> state
 <YYINITIAL> {
-		// State Change Rules:
-	"/*" {commentNestingDepth++; stateStack.push(yystate()); yybegin(MULTILINE_COMMENT);
-	return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_COMMENT_START;}
-	"\"" {yybegin(STRING); return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOUBLE_QUOTE;}
-		// Whitespace:
-	({inlineSp}|{LineTerm}|{wsItem})+ {return WHITE_SPACE;}
-		// Comments:
-	("//" {comTextItem}+ {LineTerm}?) {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.SINGLELINE_COMMENT;}
 
-      	// --- Private-Use Identifier Rule ---
-      	// Matches ` followed by identifier characters followed by `
-      	"`" {IdentifierHead}{IdentifierCharacter}* "`" { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.QUOTED_IDENTIFIER; } // Define this token
+		// STATE CHANGE: MULTILINE COMMENT START
+	"/*" {
+		  stateStack.push(yystate());
+		  yybegin(MULTILINE_COMMENT);
+		  return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_COMMENT_START;
+	  }
 
-		// Keywords that begin with a number sign (#):
-		// Prior to Swift 5.9, the following keywords were reserved: #column, #dsohandle, #error, #fileID, #filePath, #file, #function, #line, and #warning.
-		// These are now implemented as macros in the Swift standard library: column, dsohandle, error(_:), fileID, filePath, file, function, line, and warning(_:).
+		// RULES: WHITESPACE, SINGLE COMMENT
+	({inlineSp}|{LineTerm}|{wsItem})+ {
+		  return WHITE_SPACE;}
+	("//" {comTextItem}+ {LineTerm}?) {
+		  return com.makememonad.turbofan.language.swift.psi.SwiftTypes.SINGLELINE_COMMENT;}
+
+		// RULE: QUOTED/PRIVATE-USE IDENTIFIERS
+	"`" {IdentifierHead}{IdentifierCharacter}* "`" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.QUOTED_IDENTIFIER;}
+		// RULES: KEYWORDS reserved for distinct(?) use that begin with the POUND SIGN (#)
+			// NOTE: Prior to Swift 5.9, the following keywords were reserved: #column, #dsohandle, #error, #fileID, #filePath, #file, #function, #line, and #warning.
+			// NOTE: These are now implemented as macros in the Swift standard library: column, dsohandle, error(_:), fileID, filePath, file, function, line, and warning(_:).
 	"#available" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_PND_AVAILABLE;}
 	"#colorLiteral" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_PND_COLORLITERAL;}
 	"#else" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_PND_ELSE;}
@@ -159,21 +288,38 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 	"#selector"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_PND_SELECTOR;}
 	"#sourceLocation" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_PND_SOURCELOCATION;}
 	"#unavailable" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_PND_UNAVAILABLE;}
-		// Keywords (For Declarations):
+
+		// RULES: KEYWORDS reserved for DISTINCT USE.
+	"Any" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_UPPER_ANY;}
 	"associatedtype" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_ASSOCIATEDTYPE;}
+	"await" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_AWAIT;}
 	"borrowing" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_BORROWING;}
+	"break" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_BREAK;}
+	"case" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_CASE;}
 	"class" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_CLASS;}
 	"consuming" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_CONSUMING;}
+	"continue" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_CONTINUE;}
+	"default" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_DEFAULT;}
+	"defer" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_DEFER;}
 	"deinit" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_DEINIT;}
+	"do" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_DO;}
+	"else" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_ELSE;}
 	"enum" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_ENUM;}
 	"extension" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_EXTENSION;}
+	"fallthrough" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_FALLTHROUGH;}
+	"false" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_FALSE;}
 	"fileprivate" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_FILEPRIVATE;}
+	"for" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_FOR;}
 	"func" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_FUNC;}
+	"guard" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_GUARD;}
+	"if" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_IF;}
 	"import" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_IMPORT;}
+	"in" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_IN;}
 	"init" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_INIT;}
 	"inout" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_INOUT;}
 	"internal" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_INTERNAL;}
 	"let" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_LET;}
+	"nil" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_NIL;}
 	"nonisolated" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_NONISOLATED;}
 	"open" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_OPEN;}
 	"operator" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_OPERATOR;}
@@ -181,51 +327,29 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 	"private" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_PRIVATE;}
 	"protocol" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_LOWER_PROTOCOL_DECL;}
 	"public" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_PUBLIC;}
-	"rethrows" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_RETHROWS;}
-	"static" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_STATIC;}
-	"struct" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_STRUCT;}
-	"subscript" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_SUBSCRIPT;}
-	"typealias" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_TYPEALIAS;}
-	"var" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_VAR;}
-		// Keywords (For Statements):
-	"break" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_BREAK;}
-	"case" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_CASE;}
-	"catch" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_CATCH;}
-	"continue" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_CONTINUE;}
-	"default" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_DEFAULT;}
-	"defer" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_DEFER;}
-	"do" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_DO;}
-	"else" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_ELSE;}
-	"fallthrough" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_FALLTHROUGH;}
-	"for" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_FOR;}
-	"guard" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_GUARD;}
-	"if" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_IF;}
-	"in" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_IN;}
 	"repeat" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_REPEAT;}
 	"return" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_RETURN;}
-	"switch" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_SWITCH;}
-	"throw" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_THROW;}
-	"where" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_WHERE;}
-	"while" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_WHILE;}
-		// Keywords (For Expressions/Types):
-	"Any" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_UPPER_ANY;}
-	"as" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_AS;}
-	"await" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_AWAIT;}
-	"catch" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_CATCH;}
-	"false" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_FALSE;}
-	"is" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_IS;}
-	"nil" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_NIL;}
-	"rethrows" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_RETHROWS;}
 	"self" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_LOWER_SELF;}
 	"Self" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_UPPER_SELF;}
+	"static" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_STATIC;}
+	"struct" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_STRUCT;}
 	"super" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_SUPER;}
-	"throw" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_THROW;}
+	"switch" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_SWITCH;}
+	"subscript" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_SUBSCRIPT;}
 	"throws" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_THROWS;}
 	"true" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_TRUE;}
 	"try" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_TRY;}
-		// Keywords (For Patterns):
-	"_" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_UNDERSCORE;}
-		// Keywords reserved in particular contexts: Outside the context in which they appear in the grammar, they can be used as identifiers.
+	"typealias" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_TYPEALIAS;}
+	"var" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_VAR;}
+	"where" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_WHERE;}
+	"while" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_WHILE;}
+
+		// RULES: KEYWORDS reserved for DIFFERING USES depending on the context. Disambiguation for these occurs during parsing according to the grammar.
+	"catch" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_CATCH;}
+	"throw" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_THROW;}
+	"rethrows" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_RETHROWS;}
+
+		// RULES: KEYWORDS reserved ONLY IN PARTICULAR CONTEXTS. Outside the context in which they appear in the grammar, they can be used as identifiers.
 	"associativity" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_ASSOCIATIVITY;}
 	"async" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_ASYNC;}
 	"convenience" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_CONVENIENCE;}
@@ -256,18 +380,18 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 	"weak" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_WEAK;}
 	"willSet" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_WILLSET;}
 
-	// --- Floating Point Literals ---
+		// RULES: KEYWORDS reserved for PATTERNS
+	"_" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_UNDERSCORE;}
 
+	//RULES: --- FLOATING POINT LITERALS
 		// Pattern: 0x/0X followed by (optional HexDigitsWithUnderscores) followed by (optional HexFraction) followed by REQUIRED HexExponent.
 		// Constraint: Must have EITHER HexDigitsWithUnderscores before fraction, OR HexFraction, OR both. AND must have HexExponent.
 	"0"[xX] (({HexDigitsWithUnderscores})? {HexFraction} | {HexDigitsWithUnderscores}) {HexExponent} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.HEX_FLOATING_POINT_LITERAL;}
-
 		// Pattern: DecimalDigitsWithUnderscores followed by (optional DecimalFraction) followed by (optional DecimalExponent).
 		// Constraint: Must have EITHER DecimalFraction OR DecimalExponent, OR both. Cannot be just DecimalDigitsWithUnderscores.
 	{DecimalDigitsWithUnderscores} ( {DecimalFraction} ({DecimalExponent})? | {DecimalExponent} ) {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DECIMAL_FLOATING_POINT_LITERAL;}
 
-	// --- Integer Literals ---
-
+	// RULES: --- INTEGER LITERALS
 		// Binary Literal: 0b followed by binary digits with optional underscores
 		// Octal Literal: 0o followed by octal digits with optional underscores
 		// Hexadecimal Literal: 0x followed by hex digits with optional underscores
@@ -277,32 +401,78 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 	"0"[xX]{HexBody} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.HEX_LITERAL;}
 	{DecimalBody} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DECIMAL_LITERAL;}
 
-	// --- Operators and Punctuation (Fixed String Literals) ---
+	// RULES: --- OPERATORS AND PUNCTUATION (Fixed String Literals)
 		// The following tokens are reserved as punc and can’t be used as cust operators (, ), {, }, [, ], ., ,, :, ;, =, @, #, & (as a prefix operator), ->, `, ?, and ! (as postfix op).
-	"<<<"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.TRIPLE_LANGLE;}
-	">>>"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.TRIPLE_RANGLE;}
-	"===" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.TRIPLE_EQ;}
-	"..." {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.ELLIPSIS;}
-	"..<" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.RANGE_UPTO;}
-	"==" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOUBLE_EQ;}
-	"&&" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOUBLE_AMP;}
-	"||" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOUBLE_PIPE;}
-	"<<"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOUBLE_LANGLE;}
-	">>"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOUBLE_RANGLE;}
-	"??" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOUBLE_QUESTION;}
-	"!?" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.INTERROBANG;}
-	"!=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.NOTEQUAL;}
-	"<=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.LESSTHAN_OREQUAL;}
-	">=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.GREATERTHAN_OREQUAL;}
+	"as!" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_TYPE_CAST_BANG;}
+	"as?" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_TYPE_CAST_OPT;}
+	"as" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_TYPE_CAST;}
+	"is" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_TYPE_CHECK;}
+	"&<<="  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_OVERFLOW_BITSHIFT_LEFT_AND_ASSIGNMENT;}
+	"&>>="  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_OVERFLOW_BITSHIFT_RIGHT_AND_ASSIGNMENT;}
+	"<<<"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_TRIPLE_LANGLE;}
+	">>>"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_TRIPLE_RANGLE;}
+	"===" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_IDENTICAL;}
+	"!==" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_NOT_IDENTICAL;}
+	"<<=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITSHIFT_LEFT_AND_ASSIGNMENT;}
+	">>=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITSHIFT_RIGHT_AND_ASSIGNMENT;}
+	"&<<"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_OVERFLOW_BITSHIFT_LEFT;}
+	"&>>"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_OVERFLOW_BITSHIFT_RIGHT;}
+	"..." {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_HALFOPEN_RANGE;}
+	"..<" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_CLOSED_RANGE;}
+	".==" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_EQ;}
+	".!=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_NOT_EQ;}
+	"&+=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_OVERFLOW_ADD_AND_ASSIGNMENT;}
+	"&-=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_OVERFLOW_SUB_AND_ASSIGNMENT;}
+	"&*=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_OVERFLOW_MULT_AND_ASSIGNMENT;}
+	".&=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_BITWISE_AND_AND_ASSIGNMENT;}
+	".|=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_BITWISE_OR_AND_ASSIGNMENT;}
+	".^=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_BITWISE_XOR_AND_ASSIGNMENT;}
+	".<=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_LESS_THAN_OR_EQ;}
+	".>=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_GREATER_THAN_OR_EQ;}
+	"==" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_EQ;}
+	"&&" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_LOGICAL_AND;}
+	"&+" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_OVERFLOW_ADD;}
+	"&-" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_OVERFLOW_SUB;}
+	"&*" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_OVERFLOW_MULT;}
+	"&=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITWISE_AND_ASSIGNMENT;}
+	"|=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITWISE_OR_ASSIGNMENT;}
+	"^=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITWISE_XOR_ASSIGNMENT;}
+	"~=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_PATTERN_MATCH;}
+	"!=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_NOT_EQ;}
+	"<<"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITSHIFT_LEFT;}
+	">>"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITSHIFT_RIGHT;}
+	"<=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_LESS_THAN_OR_EQ;}
+	">=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_GREATER_THAN_OR_EQ;}
+	".<" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_LESS_THAN;}
+	".>" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_GREATER_THAN;}
+	"+=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_ADD_ASSIGNMENT;}
+	"-=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_SUB_ASSIGNMENT;}
+	"*=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_MULT_ASSIGNMENT;}
+	"/=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_DIV_ASSIGNMENT;}
+	"%=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_MODULO_ASSIGNMENT;}
+	"||" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_LOGICAL_OR;}
+	".|" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_BITWISE_OR;}
+	".^" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_BITWISE_XOR;}
+	".!" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_POINTWISE_NOT;}
+	"??" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_NIL_COALESCING;}
+	"?:" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_TERNARY_CONDITIONAL;}
 	"->" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.FWD_ARROW;}
 
-		// Fixed punctuation: (order might matter relative to multi-char ops, but often can group)
-	"=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.EQ;}
+		// SPECIAL RULE: RPAREN
+	")" {
+		  if (stateStack.peek() == yystate(STRING_INTERPOLATION_MARKER)) {
+			  stateStack.pop(); // pop marker state off the stack
+			  yybegin(stateStack.pop()); // pop true prior state off the stack and return to that state
+			  return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_INTERPOLATION_END;
+		  }
+		  else {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.RPAREN;
+		  }
+	  }
+
+		// RULES: FIXIE SINGLE-CHAR PUNCTUATION:
+	"(" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.LPAREN;}
 	"@" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.AT_SYMBOL;}
 	"#" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.POUND;}
-	"$" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.SDOLLAR;}
-	"(" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.LPAREN;}
-	")" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.RPAREN;}
 	"{" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.LBRACE;}
 	"}" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.RBRACE;}
 	"[" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.LBRACKET;}
@@ -310,181 +480,254 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 	"," {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.COMMA;}
 	":" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.COLON;}
 	";" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.SEMICOLON;}
-	"'" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.APOSTROPHE;}
-		// Gotta escape double-quote mark
-	"\\\"" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOUBLE_QUOTE;}
-		// Gotta escape backslash
-	"\\\\" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.BACKSLASH;}
-		// Standalone Backtick:
-	"`" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.BACKTICK;}
-		// Standalone dot: - must come BEFORE dot operator rule
 	"." {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOT;}
 
-		// Fixed single characters that can also start custom operators: - must come AFTER multi-char ops starting with them
-	"+" { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.PLUS; }
-	"-" { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MINUS;}
-
-	    // All other fixed single-char operators:
+		// RULES: FIXIE SINGLE-CHARs that CAN ALSO START CUSTOM OPERATORS
+		//operator-head → / | = | - | + | ! | * | % | < | > | & | | | ^ | ~ | ?
 	"/"{return com.makememonad.turbofan.language.swift.psi.SwiftTypes.FWDSLASH;}
-	"?" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.QUESTION;}
-	"!" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.BANG;}
-	"|" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.PIPE;}
-	"*" { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STAR;}
-	"&" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.AMP;}
-	"<"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.LANGLE;}
-	">"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.RANGLE;}
-	"~" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.TILDE;}
-	"^" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.CARAT;}
-	"%" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MODULO;}
+	"=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_ASSIGNMENT;}
+	"+" { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_ADD; }
+	"-" { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_SUB;}
+	"*" { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_MULT;}
+	"%" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_MODULO;}
+	"!" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_NOT;}
+	"<"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_LANGLE;}
+	">"  {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_RANGLE;}
+	"&" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITWISE_AND;}
+	"|" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITWISE_OR;}
+	"^" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITWISE_XOR;}
+	"~" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_BITWISE_NOT;}
+	"?" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_QUESTION;}
 
-	// --- General Custom Operator Rules ---
-		// Based on Swift Language Reference -> Lexical Structure -> Operators
+		// RULE: IMPLICIT PARAMETER NAMES, PROPERTY WRAPPER PROJECTIONS
+	"\$"{DecimalDigit}+ {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.IMPLICIT_PARAMETER_NAME;}
+	"\$"{IdentifierHead}{IdentifierCharacter}* {return com.makememonad.turbofan.language.swift.SwiftTypes.PROPERTY_WRAPPER_PROJECTION;}
+
+	// RULES: --- CUSTOM OPERATORS
+		// DOT OPERATORS: Matches ".+" ".**." etc.
+		// NON-DOT OPERATORS: Matches "***" "+++" "<*>" etc.
+		// REGULAR IDENTIFIERS:
 	{DotOperatorHead} {DotOperatorCharacter}+ {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOT_OPERATOR;}
-		// Note: This matches ".+" ".**." etc. It matches the longest sequence starting with dot followed by dot-operator-chars.
-
 	{OperatorHead} {OperatorCharacter}* {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OPERATOR;}
-		// Note: This matches "***" "+++" "<*>" etc. It matches the longest sequence starting with operator-head followed by operator-chars.
-
-		// Identifiers (Regular - using the comprehensive macros)
 	{IdentifierHead}{IdentifierCharacter}* {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.IDENTIFIER;}
 
-	// --- String Literal Entry Rules ---
-		// Longest matching extended delimiters first, then regular delimiters.
+	// RULES: --- String Literal Entry Rules
+
+	// EXT MULTILINE STRING
 	{ExtendedDelimiter}"\"\"\"" {
 		currentExtendedDelimiterLength = yytext().length() - 3;
+		stateStack.push(yystate());
 		yybegin(EXTENDED_MULTILINE_STRING);
-		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.EXTENDED_MULTILINE_STRING_OPEN;
+		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.EXTENDED_MULTILINE_STRING_START;
 	}
 
+	// MUTILINE STRING ENTRY
 	"\"\"\"" {
 		currentExtendedDelimiterLength = 0;
+		stateStack.push(yystate());
 		yybegin(MULTILINE_STRING);
-		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.TRIPLE_DOUBLE_QUOTE;
+		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_START;
 	}
 
+	// EXT STRING ENTRY
 	{ExtendedDelimiter}"\"" {
 		currentExtendedDelimiterLength = yytext().length() - 1;
+		stateStack.push(yystate());
 		yybegin(EXTENDED_STRING);
-		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.EXTENDED_SINGLE_QUOTE_OPEN;
+		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.EXTENDED_STRING_START;
 	}
 
+	// STRING ENTRY
 	"\"" {
 		currentExtendedDelimiterLength = 0;
+		stateStack.push(yystate());
 		yybegin(STRING);
-		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOUBLE_QUOTE;
+		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_START;
 	}
-		// Fallback:
+
+		// Fallback: Should never be matched. Good practice to have regardless.
+		// *Shudders, imagining the number of bugs I've yet to notice in my code*
 	. {return BAD_CHARACTER;}
 }
 
-		// Rules for <MULTILINE_COMMENT> state
-<MULTILINE_COMMENT> {
-	"/*" {commentNestingDepth++;
-		  return SwiftTypes.MULTILINE_COMMENT_START;
-	  }
-	"*/" {commentNestingDepth--;
-		  if (commentNestingDepth == 0) {yybegin(stateStack.pop()); return SwiftTypes.MULTILINE_COMMENT_END;}
-		  else {return SwiftTypes.MULTILINE_COMMENT_END;}
-	}
-		// Rules for comment content (order matters):
-		// Sequences of non-stars, non-newlines, non-slashes
-	[^*\n/]+ {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.COMMENT_TEXT;}
-		// A single star (that wasn't part of */)
-	"*" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.COMMENT_TEXT;}
-		// A single slash (that wasn't part of /*)
-	"/" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.COMMENT_TEXT;}
-		// Fallback - matches any other character, including newlines
-		// Treat everything else as text within the comment
-	.|\n {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.COMMENT_TEXT; }
-		// You could add a final '.' rule returning BAD_CHARACTER if you wanted to be very strict, but within a comment, this is rarely needed as most chars are valid.
-}
 
-		// Rules for <String> state
+//
+// ADDITIONAL STATES BELOW
+//
+
+
+	// RULES: FOR STRING LITERAL STATE
 <STRING> {
+		// RULE: STRING INTERPOLATION START
 	"\\("{
 		stateStack.push(yystate());
-		yybegin(STRING_INTERPOLATION);
+		stateStack.push(STRING_INTERPOLATION_MARKER);
+		yybegin(INITIAL);
 		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_INTERPOLATION_START;
 	}
-		// Closing Delimiter Rule (matches just the quote)
-	"\"" {
-			// Only transition if it's the correct delimiter for a regular string (length 0)
-		if (currentExtendedDelimiterLength == 0) {
-			yybegin(YYINITIAL); return com.makememonad.turbofan.language.swift.psi.SwiftTypes.DOUBLE_QUOTE;
-		}
-			// Stay in state; fallback or other rules consume rest.
-		else {return BAD_CHARACTER;}
-	}
-		// Escape Sequences
-	\\ {AnyEscapedCharacterPattern} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_ESCAPE_SEQUENCE;}
-		// Prohibited Newlines
-	[\u000A\u000D] { /* Found newline in single line string - Error? */ return BAD_CHARACTER;}
-		// Regular String Content
+		// RULE: CLOSING DELIMITER
+	"\"" {yybegin(stateStack.pop);return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_END;}
+		// RULES: ESCAPE SEQuences, PROHIBITED NEWLINES, STRING CONTENT
+	\\ {AnyEscapedCharacterPattern} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_ESCAPED_SEQUENCE;}
+	[\u000A\u000D] {return BAD_CHARACTER;}
 	{QuotedTextItemPattern_SingleLine}+ {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_TEXT;}
-		// Fallback
+		// Fallback: (good practice, though shouldn't ever be matched
 	. {return BAD_CHARACTER;}
 }
 
-		// Rules for <MULTILINE_STRING> state
+
+	// RULES: FOR MULTILINE_STRING STATE
 <MULTILINE_STRING> {
+		// RULE: INTERPOLATION START
 	"\\(" {
 		  stateStack.push(yystate());
-		  yybegin(STRING_INTERPOLATION);
+		  stateStack.push(STRING_INTERPOLATION_MARKER);
+		  yybegin(INITIAL);
 		  return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_INTERPOLATION_START;
 	  }
-
-	\\{AnyEscapedCharacterPattern} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_ESCAPE_SEQUENCE;}
-	{EscapedNewlinePattern} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_ESCAPED_NEWLINE;}
-
-	// Nested Multiline Comment Start
+		// RULE: CLOSING DELIMITER
+	"\"\"\"" {
+		yybegin(stateStack.pop());
+		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_END;
+	}
+		// RULE: NESTED MULTILINE STRING START
 	"/*" {
-		commentNestingDepth++;
 		stateStack.push(yystate());
 		yybegin(MULTILINE_COMMENT);
-		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_COMMENT_START;
+		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_START;
 	}
 
-		// Closing Delimiter
-	"\"\"\"" {
-		if (currentExtendedDelimiterLength == 0) {
-			yybegin(YYINITIAL); return com.makememonad.turbofan.language.swift.psi.SwiftTypes.TRIPLE_DOUBLE_QUOTE;}
-		else {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_TEXT;} // Or a specific """_LITERAL token
-	}
+		// RULES: ESCAPE SEQs
+	{EscapedNewlinePattern} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_ESCAPED_NEWLINE;}
+	\\{AnyEscapedCharacterPattern} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_ESCAPED_SEQUENCE;}
 
-	// Regular Multiline String Content
-	([^"\\\u000A\u000D] | [\u000A\u000D])+ {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_TEXT;}
-
-    // Alternative simplified content rule, relying on ordering and other rules taking precedence:
-    // [^"\\/]+ { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_TEXT; } // Match chars not ", \, or /
-    // Or even just:
-    // [^"\\]+ { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_TEXT; } // Match chars not " or \ (allows /)
-
-		// Fallback:
-	.|\n {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_TEXT;}
-		// The above content rule might consume newlines, but the fallback should catch any char not handled.
-		// Need to revisit the rules in <MULTILINE_COMMENT> to ensure "*/" pops back to MULTILINE_STRING if that's on the stack.
-
-}
-
-		// Rules for <EXTENDED_STRING> state
-<EXTENDED_STRING> {
-
-		// Fallback:
-	. {return BAD_CHARACTER}
-}
-
-		// Rules for <EXTENDED_MULTILINE_STRING> state
-<EXTENDED_MULTILINE_STRING> {
-
-		// Fallback:
-	. {return BAD_CHARACTER}
-}
-
-      // Rules for String Interpolation
-      // Parser will need to handle a lot of this after lexing... Will need to implement after code-gen
-<STRING_INTERPOLATION> {
-		// Signal to the parser that the embedded expression ends here.
-	")" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.RPAREN;}
+		// RULE: MULTILINE STRING CONTENT
+	(.|\n)+ {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_TEXT;}
 		// Fallback:
 	. {return BAD_CHARACTER;}
 }
+
+
+	// RULES: FOR EXTENDED_STRING STATE
+<EXTENDED_STRING> {
+	// RULE: INTERPOLATION START
+	"\\"{ExtendedDelimiter}"(" {
+		if (currentExtendedDelimiterLength == yytext().length() - 2 ){
+		    stateStack.push(yystate());
+		    stateStack.push(STRING_INTERPOLATION_MARKER);
+		    yybegin(INITIAL);
+		    return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_INTERPOLATION_START;}
+		else {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_TEXT;}
+	}
+
+    // RULE: CLOSING DELIMITER
+    "\""{ExtendedDelimiter} {
+        int matchedNumHashes = yytext().length() - 1;
+        if (matchedNumHashes == currentExtendedDelimiterLength) {
+            if (!stateStack.isEmpty()) {yybegin(stateStack.pop());}
+			else {yybegin(INITIAL);}
+            return com.makememonad.turbofan.language.swift.psi.SwiftTypes.EXTENDED_STRING_END;}
+		else {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_TEXT;}
+    }
+
+    // RULE: ESC DELIMITER OR BACKSLASH
+    "\\" {
+        // Action code attempts to check for an escaped delimiter: \ + N '#' + "
+        // Simplified placeholder version due to yyinput() and pushback complexities.
+        if (currentExtendedDelimiterLength > 0) {
+            boolean hashesMatch = true;
+            for (int i = 0; i < currentExtendedDelimiterLength; i++) {
+                int charN = yyinput();
+                if (charN == YYEOF || (char) charN != '#') {hashesMatch = false;break;}
+			}
+            if (hashesMatch) {
+                int charQuote = yyinput();
+                if (charQuote != YYEOF && (char) charQuote == '"') {}
+				else {}}else {}}
+        return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_TEXT;
+    }
+
+		// RULE: PROHIBITED NEWLINES
+	[\r\n] {return BAD_CHARACTER;}
+
+		// RULE: EXTENDED STRING CONTENT
+	[^\r\n]+ {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_TEXT;}
+		// Fallback (shouldn't be reached, but good practice soooo ya' know)
+	. { return BAD_CHARACTER; }
+}
+
+
+	// RULES: FOR EXTENDED_MULTILINE_STRING STATE
+<EXTENDED_MULTILINE_STRING> {
+
+	// RULE: INTERPOLATION START
+	"\\{ExtendedDelimiter}(" {
+		if (currentExtendedDelimiterLength == yytext().length() - 2 ){
+			stateStack.push(yystate());
+			stateStack.push(STRING_INTERPOLATION_MARKER);
+			yybegin(INITIAL);
+			return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_INTERPOLATION_START;}
+		else {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_TEXT;}
+	}
+
+    // RULE: CLOSING DELIMITER
+    "\"\"\""{ExtendedDelimiter} {
+        int matchedNumHashes = yytext().length() - 3;
+        if (matchedNumHashes == currentExtendedDelimiterLength) {
+            if (!stateStack.isEmpty()) { yybegin(stateStack.pop());}
+		    else {yybegin(INITIAL);}
+            return com.makememonad.turbofan.language.swift.psi.SwiftTypes.EXTENDED_MULTILINE_STRING_END;}
+		else {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_TEXT;}
+    }
+
+    // RULE: ESCAPED DELIMITER or LITERAL BACKSLASH
+    "\\" {
+        if (currentExtendedDelimiterLength > 0) {
+            boolean hashesMatch = true;
+            for (int i = 0; i < currentExtendedDelimiterLength; i++) {
+                int charN = yyinput();
+                if (charN == YYEOF || (char) charN != '#') {hashesMatch = false;break;}
+			}
+            if (hashesMatch) {
+                int q1 = yyinput();
+                int q2 = yyinput();
+                int q3 = yyinput();
+                if (q1 != YYEOF && (char)q1 == '"' &&
+                    q2 != YYEOF && (char)q2 == '"' &&
+                    q3 != YYEOF && (char)q3 == '"') {}
+				else {}} else {}}
+		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_TEXT;
+    }
+
+    // RULE: NESTED MULTILINE COMMENT START
+	"/*" {stateStack.push(yystate());yybegin(MULTILINE_COMMENT);
+		  return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_STRING_START;}
+
+		// RULE: EXTENDED MULTILINE STRING CONTENT
+	(.|\n)+ {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_TEXT;}
+		// Fallback (shouldn't be reached, ideally)
+	. {return BAD_CHARACTER;}
+}
+
+
+		// RULES: FOR MULTILINE_COMMENT STATE
+<MULTILINE_COMMENT> {
+		// RULE: NESTED MULTILINE COMMENT START
+
+	"/*" {
+				stateStack.push(yystate());
+				yybegin(MULTILINE_COMMENT);
+				return SwiftTypes.MULTILINE_COMMENT_START;
+	  }
+
+		// RULE: CLOSING DELIMITER
+	"*/" {yybegin(stateStack.pop());return SwiftTypes.MULTILINE_COMMENT_END;}
+
+		// RULES: MULTILINE COMMENT CONTENT & Fallbacks
+	[^*\n/]+ {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.COMMENT_TEXT;}
+	"*" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.COMMENT_TEXT;}
+	"/" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.COMMENT_TEXT;}
+	.|\n {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.COMMENT_TEXT; }
+	. {return BAD_CHARACTER;}
+}
+// END FILE Swift.flex

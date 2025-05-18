@@ -1,52 +1,291 @@
-// Swift Language Grammar for CLion Plugin
+  /*
+  // Swift Language Grammar for CLion Plugin
+  // BEGIN FILE Swift.bnf
+  // Reference Links:
+  // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/aboutthelanguagereference/
+  // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/lexicalstructure/
+  // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/summaryofthegrammar/
+  // Above references are:
+  // Copyright © 2014–2023 Apple Inc. and the Swift project authors. All rights reserved.
+  // This document is made available under a Creative Commons Attribution 4.0 International (CC BY 4.0) License.
+  // Swift and the Swift logo are trademarks of Apple Inc.
+  //
+  // Link to grammar kit i think
+  // Above reference is:
+  // Info here...
+  //
+  */
 
-// Header attributes - you'll fill these in later to configure generation
-// {
-//   parserClass="com.makememonad.turbofan.language.swift.parser.SwiftParser"
-//   lexerClass="com.makememonad.turbofan.language.swift.lexer.SwiftLexer"
-//   // ... other options
-// }
+  {
+  // Generates methods like `getKwIf()` etc. on composite elements
+  generatePsi=true
+  generateTokens=true
+  generateTokenAccessors=true
+  parserClass="com.makememonad.turbofan.language.swift.parser.SwiftParser"
+  parserUtilClass="com.makememonad.turbofan.language.swift.parser.SwiftParserUtil"
+  implements="com.intellij.psi.tree.IElementType"
+  // Common base for PSI elements
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+  // Where IElementType constants go
+  elementTypeHolderClass="com.makememonad.turbofan.language.swift.psi.SwiftTypes"
+  // Base for element types
+  elementTypeClass="com.intellij.psi.tree.IElementType"
+  // Base for token types (often same as elementTypeClass)
+  tokenTypeClass="com.intellij.psi.tree.IElementType"
+  // e.g., Swift<RuleName> for interfaces
+  psiClassPrefix="Swift"
+  // e.g., SwiftImpl<RuleName> for implementations
+  psiImplClassSuffix="SwiftImpl"
+  // Where PSI interfaces go
+  psiPackage="com.makememonad.turbofan.language.swift.psi"
+  // Where PSI impls go
+  psiImplPackage="com.makememonad.turbofan.language.swift.psi.impl"
+  // For custom methods on PSI nodes
+  psiImplUtilClass="com.makememonad.turbofan.language.swift.psi.impl.SwiftPsiImplUtil"
+  // elementTypeFactory()= com.makememonad.turbofan.language.swift.psi.stubs.SwiftStubElementTypeFactory.create
+  }
+  // GRAMMAR RULE DEFINITIONS:
 
-// Define the tokens for Swift.
-// The patterns for these tokens will be defined in Swift.flex
-tokens {
-  // Keywords - list all Swift keywords here by name
-  LET="LET"
-  VAR="VAR"
-  FUNC="FUNC"
-  IF="IF"
-  ELSE="ELSE"
-  CLASS="CLASS"
-  STRUCT="STRUCT"
-  ENUM="ENUM"
+  swiftFile ::= IDENTIFIER
 
-  // Operators - list common operators by name
-  PLUS="PLUS"
-  MINUS="MINUS"
-  STAR="STAR"
-  DIV="DIV"
-  EQ="EQ"
+  // TOKEN DEFINITIONS:
+  // TOKENS: GENERAL/SHARED ACROSS STATES
+  token COMMENT_TEXT
+  token SINGLELINE_COMMENT
+  token QUOTED_IDENTIFIER
 
-  // Punctuation - list common punctuation by name
-  LPAREN="LPAREN"
-  RPAREN="RPAREN"
-  LBRACE="LBRACE"
-  RBRACE="RBRACE"
-  LBRACKET="LBRACKET"
-  RBRACKET="RBRACKET"
-  DOT="DOT"
-  COMMA="COMMA"
-  COLON="COLON"
-  SEMICOLON="SEMICOLON"
+  token STRING_INTERPOLATION_START
+  token STRING_TEXT
+  token STRING_START
+  token STRING_END
+  token STRING_ESCAPED_SEQUENCE
+  token MULTILINE_STRING_START
+  token MULTILINE_STRING_END
+  token MULTILINE_STRING_ESCAPED_NEWLINE
+  token MULTILINE_STRING_ESCAPED_SEQUENCE
+  token EXTENDED_STRING_START
+  token EXTENDED_STRING_END
+  token EXTENDED_MULTILINE_STRING_START
+  token EXTENDED_MULTILINE_STRING_END
+  token MULTILINE_COMMENT_START
+  token MULTILINE_COMMENT_END
 
-  // Identifiers, Literals, Comments, Whitespace - list by name
-  IDENTIFIER="IDENTIFIER"
-  INTEGER_LITERAL="INTEGER_LITERAL"
-  STRING_LITERAL="STRING_LITERAL"
-  SINGLE_LINE_COMMENT="SINGLE_LINE_COMMENT"
-  MULTI_LINE_COMMENT="MULTI_LINE_COMMENT"
-  WHITE_SPACE="WHITE_SPACE"
-}
+  // TOKENS: KEYWORDS (Pound Sign #)
+  token KW_PND_AVAILABLE
+  token KW_PND_COLORLITERAL
+  token KW_PND_ELSE
+  token KW_PND_ELSEIF
+  token KW_PND_ENDIF
+  token KW_PND_FILELITERAL
+  token KW_PND_IF
+  token KW_PND_IMAGELITERAL
+  token KW_PND_KEYPATH
+  token KW_PND_SELECTOR
+  token KW_PND_SOURCELOCATION
+  token KW_PND_UNAVAILABLE
 
-// No grammar rules yet. We'll add those after getting the lexer defined.
-// file ::= ...
+  // TOKENS: KEYWORDS reserved for DISTINCT USE
+  token KW_UPPER_ANY
+  token KW_ASSOCIATEDTYPE
+  token KW_AWAIT
+  token KW_BORROWING
+  token KW_BREAK
+  token KW_CASE
+  token KW_CLASS
+  token KW_CONSUMING
+  token KW_CONTINUE
+  token KW_DEFAULT
+  token KW_DEFER
+  token KW_DEINIT
+  token KW_DO
+  token KW_ELSE
+  token KW_ENUM
+  token KW_EXTENSION
+  token KW_FALLTHROUGH
+  token KW_FALSE
+  token KW_FILEPRIVATE
+  token KW_FOR
+  token KW_FUNC
+  token KW_GUARD
+  token KW_IF
+  token KW_IMPORT
+  token KW_IN
+  token KW_INIT
+  token KW_INOUT
+  token KW_INTERNAL
+  token KW_LET
+  token KW_NIL
+  token KW_NONISOLATED
+  token KW_OPEN
+  token KW_OPERATOR
+  token KW_PRECEDENCEGROUP
+  token KW_PRIVATE
+  token KW_LOWER_PROTOCOL_DECL
+  token KW_PUBLIC
+  token KW_REPEAT
+  token KW_RETURN
+  token KW_LOWER_SELF
+  token KW_UPPER_SELF
+  token KW_STATIC
+  token KW_STRUCT
+  token KW_SUPER
+  token KW_SWITCH
+  token KW_SUBSCRIPT
+  token KW_THROWS
+  token KW_TRUE
+  token KW_TRY
+  token KW_TYPEALIAS
+  token KW_VAR
+  token KW_WHERE
+  token KW_WHILE
+
+  // TOKENS: KEYWORDS reserved for DIFFERING USES depending on the context.
+  token KW_CATCH
+  token KW_THROW
+  token KW_RETHROWS
+
+  // TOKENS: KEYWORDS reserved ONLY IN PARTICULAR CONTEXTS. Outside the context in which they appear in the grammar, they can be used as identifiers.
+token KW_ASSOCIATIVITY
+token KW_ASYNC
+token KW_CONVENIENCE
+token KW_DIDSET
+token KW_DYNAMIC
+token KW_FINAL
+token KW_GET
+token KW_INDIRECT
+token KW_INFIX
+token KW_LAZY
+token KW_LEFT
+token KW_MUTATING
+token KW_NONE
+token KW_NONMUTATING
+token KW_OPTIONAL
+token KW_OVERRIDE
+token KW_PACKAGE
+token KW_POSTFIX
+token KW_PRECEDENCE
+token KW_PREFIX
+token KW_UPPER_PROTOCOL
+token KW_REQUIRED
+token KW_RIGHT
+token KW_SET
+token KW_SOME
+token KW_UPPER_TYPE
+token KW_UNOWNED
+token KW_WEAK
+token KW_WILLSET
+
+  // TOKENS: KEYWORDS reserved for PATTERNS
+  token KW_UNDERSCORE
+
+  // TOKENS: FLOATING POINT LITERALS
+  token HEX_FLOATING_POINT_LITERAL
+  token DECIMAL_FLOATING_POINT_LITERAL
+
+  // INTEGER LITERALS
+  token BINARY_LITERAL
+  token OCTAL_LITERAL
+  token HEX_LITERAL
+  token DECIMAL_LITERAL
+
+  // OPERATORS AND PUNCTUATION (Fixed String Literals)
+  token OP_TYPE_CAST_BANG
+  token OP_TYPE_CAST_OPT
+  token OP_TYPE_CAST
+  token OP_TYPE_CHECK
+  token OP_OVERFLOW_BITSHIFT_LEFT_AND_ASSIGNMENT
+  token OP_OVERFLOW_BITSHIFT_RIGHT_AND_ASSIGNMENT
+  token OP_TRIPLE_LANGLE
+  token OP_TRIPLE_RANGLE
+  token OP_IDENTICAL
+  token OP_NOT_IDENTICAL
+  token OP_BITSHIFT_LEFT_AND_ASSIGNMENT
+  token OP_BITSHIFT_RIGHT_AND_ASSIGNMENT
+  token OP_OVERFLOW_BITSHIFT_LEFT
+  token OP_OVERFLOW_BITSHIFT_RIGHT
+  token OP_HALFOPEN_RANGE
+  token OP_CLOSED_RANGE
+  token OP_POINTWISE_EQ
+  token OP_POINTWISE_NOT_EQ
+  token OP_OVERFLOW_ADD_AND_ASSIGNMENT
+  token OP_OVERFLOW_SUB_AND_ASSIGNMENT
+  token OP_OVERFLOW_MULT_AND_ASSIGNMENT
+  token OP_POINTWISE_BITWISE_AND_AND_ASSIGNMENT
+  token OP_POINTWISE_BITWISE_OR_AND_ASSIGNMENT
+  token OP_POINTWISE_BITWISE_XOR_AND_ASSIGNMENT
+  token OP_POINTWISE_LESS_THAN_OR_EQ
+  token OP_POINTWISE_GREATER_THAN_OR_EQ
+  token OP_EQ
+  token OP_LOGICAL_AND
+  token OP_OVERFLOW_ADD
+  token OP_OVERFLOW_SUB
+  token OP_OVERFLOW_MULT
+  token OP_BITWISE_AND_ASSIGNMENT
+  token OP_BITWISE_OR_ASSIGNMENT
+  token OP_BITWISE_XOR_ASSIGNMENT
+  token OP_PATTERN_MATCH
+  token OP_NOT_EQ
+  token OP_BITSHIFT_LEFT
+  token OP_BITSHIFT_RIGHT
+  token OP_LESS_THAN_OR_EQ
+  token OP_GREATER_THAN_OR_EQ
+  token OP_POINTWISE_LESS_THAN
+  token OP_POINTWISE_GREATER_THAN
+  token OP_ADD_ASSIGNMENT
+  token OP_SUB_ASSIGNMENT
+  token OP_MULT_ASSIGNMENT
+  token OP_DIV_ASSIGNMENT
+  token OP_MODULO_ASSIGNMENT
+  token OP_LOGICAL_OR
+  token OP_POINTWISE_BITWISE_OR
+  token OP_POINTWISE_BITWISE_XOR
+  token OP_POINTWISE_NOT
+  token OP_NIL_COALESCING
+  token OP_TERNARY_CONDITIONAL
+  token FWD_ARROW
+
+  // TOKENS: RPAREN
+  token STRING_INTERPOLATION_END
+  token RPAREN
+
+  // TOKENS: FIXIE SINGLE-CHAR PUNCTUATION:
+  token LPAREN
+  token AT_SYMBOL
+  token POUND
+  token LBRACE
+  token RBRACE
+  token LBRACKET
+  token RBRACKET
+  token COMMA
+  token COLON
+  token SEMICOLON
+  token DOT
+
+  // TOKENS: FIXIE SINGLE-CHARs that CAN ALSO START CUSTOM OPERATORS
+  token FWDSLASH
+  token OP_ASSIGNMENT
+  token OP_ADD
+  token OP_SUB
+  token OP_MULT
+  token OP_MODULO
+  token OP_NOT
+  token OP_LANGLE
+  token OP_RANGLE
+  token OP_BITWISE_AND
+  token OP_BITWISE_OR
+  token OP_BITWISE_XOR
+  token OP_BITWISE_NOT
+  token OP_QUESTION
+
+  // TOKENS: IMPLICIT PARAMETER NAMES, PROPERTY WRAPPER PROJECTIONS
+  token IMPLICIT_PARAMETER_NAME
+  token PROPERTY_WRAPPER_PROJECTION
+
+  // TOKENS: CUSTOM OPERATORS
+  token DOT_OPERATOR
+  token OPERATOR
+  token IDENTIFIER
+
+  // TOKENS: REGEX LITERALS (FUTURE)
+
+  // END FILE Swift.bnf

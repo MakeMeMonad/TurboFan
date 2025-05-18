@@ -19,7 +19,7 @@ version = providers.gradleProperty("pluginVersion").get()
 kotlin {jvmToolchain(21)}
 
 // Include the generated files in the source set
-sourceSets {main {kotlin {srcDirs("src/main/gen")}}}
+// sourceSets {main {kotlin {srcDirs("src/main/gen")}}}
 
 // Configure project's dependencies
 repositories {
