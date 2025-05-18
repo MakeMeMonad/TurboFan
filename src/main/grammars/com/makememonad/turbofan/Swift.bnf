@@ -23,7 +23,7 @@
   generateTokenAccessors=true
   parserClass="com.makememonad.turbofan.language.swift.parser.SwiftParser"
   parserUtilClass="com.makememonad.turbofan.language.swift.parser.SwiftParserUtil"
-  implements="com.intellij.psi.tree.IElementType"
+  // implements="com.intellij.psi.tree.IElementType"
   // Common base for PSI elements
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
   // Where IElementType constants go

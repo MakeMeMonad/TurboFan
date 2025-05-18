@@ -12,6 +12,39 @@ plugins {
     id("org.jetbrains.grammarkit") version "2022.3.2.2" // Grammar-Kit Plugin
 }
 
+sourceSets{main{kotlin{srcDirs("src/main/gen")}}}
+
+/*
+grammarkit {
+    jflex {
+        sourceFile.set(file("src/main/grammars/com/makememonad/turbofan/Swift.flex"))
+        // targetDir.set(layout.buildDirectory.dir("generated/sources/jflex"))
+    }
+
+    grammar {
+        sourceFile.set(file("src/main/grammars/com/makememonad/turbofan/Swift.bnf"))
+        // targetRootOutputDir.set(layout.buildDirectory.dir("generated/sources/bnf"))
+        // rootParser.set("your.package.SwiftParser") // Optional: if not in BNF header
+    }
+}
+*/
+
+/*
+If the above grammarkit { jflex { ... } grammar { ... } } doesn't work for your standalone plugin version,
+    you might need to configure the tasks directly.
+tasks.named<org.jetbrains.grammarkit.tasks.GenerateLexerTask>("generateSwiftLexer") { // Or whatever the exact task name is
+    sourceFile.set(project.file("src/main/grammars/com/makememonad/turbofan/Swift.flex"))
+    // targetDir.set(project.layout.buildDirectory.dir("generated/jflex"))
+}
+
+tasks.named<org.jetbrains.grammarkit.tasks.GenerateParserTask>("generateSwiftParser") { // Or whatever the exact task name is
+    sourceFile.set(project.file("src/main/grammars/com/makememonad/turbofan/Swift.bnf"))
+    // targetRootOutputDir.set(project.layout.buildDirectory.dir("generated/bnf"))
+    // rootParser.set("com.makememonad.turbofan.language.swift.parser.SwiftParser") // From your BNF header
+}
+*/
+
+
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 

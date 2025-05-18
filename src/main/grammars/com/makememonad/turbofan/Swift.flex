@@ -484,7 +484,7 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 
 		// RULES: FIXIE SINGLE-CHARs that CAN ALSO START CUSTOM OPERATORS
 		//operator-head → / | = | - | + | ! | * | % | < | > | & | | | ^ | ~ | ?
-	"/"{return com.makememonad.turbofan.language.swift.psi.SwiftTypes.FWDSLASH;}
+	"/" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.FWDSLASH;}
 	"=" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_ASSIGNMENT;}
 	"+" { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_ADD; }
 	"-" { return com.makememonad.turbofan.language.swift.psi.SwiftTypes.OP_SUB;}
@@ -559,11 +559,11 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 	// RULES: FOR STRING LITERAL STATE
 <STRING> {
 		// RULE: STRING INTERPOLATION START
-	"\\("{
-		stateStack.push(yystate());
-		stateStack.push(STRING_INTERPOLATION_MARKER);
-		yybegin(INITIAL);
-		return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_INTERPOLATION_START;
+	"\\(" {
+          stateStack.push(yystate());
+          stateStack.push(STRING_INTERPOLATION_MARKER);
+          yybegin(INITIAL);
+          return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_INTERPOLATION_START;
 	}
 		// RULE: CLOSING DELIMITER
 	"\"" {yybegin(stateStack.pop);return com.makememonad.turbofan.language.swift.psi.SwiftTypes.STRING_END;}
