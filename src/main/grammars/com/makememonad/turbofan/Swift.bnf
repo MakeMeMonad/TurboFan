@@ -10,9 +10,9 @@
   // This document is made available under a Creative Commons Attribution 4.0 International (CC BY 4.0) License.
   // Swift and the Swift logo are trademarks of Apple Inc.
   //
-  // Link to grammar kit i think
+  // https://github.com/JetBrains/Grammar-Kit
   // Above reference is:
-  // Info here...
+  // Pertinent License Info goes here...
   //
   */
 
@@ -48,8 +48,14 @@
 
   swiftFile ::= IDENTIFIER
 
-  // TOKEN DEFINITIONS:
-  // TOKENS: GENERAL/SHARED ACROSS STATES
+
+
+
+
+
+  // LEXICAL TOKEN DEFINITIONS:
+
+  // GENERAL/SHARED ACROSS STATES
   token COMMENT_TEXT
   token SINGLELINE_COMMENT
   token QUOTED_IDENTIFIER
@@ -70,7 +76,7 @@
   token MULTILINE_COMMENT_START
   token MULTILINE_COMMENT_END
 
-  // TOKENS: KEYWORDS (Pound Sign #)
+  // KEYWORDS (Pound Sign #)
   token KW_PND_AVAILABLE
   token KW_PND_COLORLITERAL
   token KW_PND_ELSE
@@ -84,7 +90,7 @@
   token KW_PND_SOURCELOCATION
   token KW_PND_UNAVAILABLE
 
-  // TOKENS: KEYWORDS reserved for DISTINCT USE
+  // KEYWORDS reserved for DISTINCT USE
   token KW_UPPER_ANY
   token KW_ASSOCIATEDTYPE
   token KW_AWAIT
@@ -139,12 +145,12 @@
   token KW_WHERE
   token KW_WHILE
 
-  // TOKENS: KEYWORDS reserved for DIFFERING USES depending on the context.
+  // KEYWORDS reserved for DIFFERING USES depending on the context.
   token KW_CATCH
   token KW_THROW
   token KW_RETHROWS
 
-  // TOKENS: KEYWORDS reserved ONLY IN PARTICULAR CONTEXTS. Outside the context in which they appear in the grammar, they can be used as identifiers.
+  // KEYWORDS reserved ONLY IN PARTICULAR CONTEXTS. Outside the context in which they appear in the grammar, they can be used as identifiers.
 token KW_ASSOCIATIVITY
 token KW_ASYNC
 token KW_CONVENIENCE
@@ -175,10 +181,10 @@ token KW_UNOWNED
 token KW_WEAK
 token KW_WILLSET
 
-  // TOKENS: KEYWORDS reserved for PATTERNS
+  // KEYWORDS reserved for PATTERNS
   token KW_UNDERSCORE
 
-  // TOKENS: FLOATING POINT LITERALS
+  // FLOATING POINT LITERALS
   token HEX_FLOATING_POINT_LITERAL
   token DECIMAL_FLOATING_POINT_LITERAL
 
@@ -244,11 +250,11 @@ token KW_WILLSET
   token OP_TERNARY_CONDITIONAL
   token FWD_ARROW
 
-  // TOKENS: RPAREN
+  // SPECIAL: RPAREN
   token STRING_INTERPOLATION_END
   token RPAREN
 
-  // TOKENS: FIXIE SINGLE-CHAR PUNCTUATION:
+  // FIXIE SINGLE-CHAR PUNCTUATION:
   token LPAREN
   token AT_SYMBOL
   token POUND
@@ -261,7 +267,7 @@ token KW_WILLSET
   token SEMICOLON
   token DOT
 
-  // TOKENS: FIXIE SINGLE-CHARs that CAN ALSO START CUSTOM OPERATORS
+  // FIXIE SINGLE-CHARs that CAN ALSO START CUSTOM OPERATORS
   token FWDSLASH
   token OP_ASSIGNMENT
   token OP_ADD
@@ -277,11 +283,11 @@ token KW_WILLSET
   token OP_BITWISE_NOT
   token OP_QUESTION
 
-  // TOKENS: IMPLICIT PARAMETER NAMES, PROPERTY WRAPPER PROJECTIONS
+  // IMPLICIT PARAMETER NAMES, PROPERTY WRAPPER PROJECTIONS
   token IMPLICIT_PARAMETER_NAME
   token PROPERTY_WRAPPER_PROJECTION
 
-  // TOKENS: CUSTOM OPERATORS
+  // CUSTOM OPERATORS
   token DOT_OPERATOR
   token OPERATOR
   token IDENTIFIER
