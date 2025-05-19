@@ -58,8 +58,11 @@ import static com.makememonad.turbofan.language.swift.psi.SwiftTypes.*;
 %init}
 		// --- JFlex MACRO DECLARATIONS
 LineTerm = \R
-inlineSp =  [\u0009 \u0020]
-SwiftLineBr = \u000A | \u000D | \u000D\u000A
+
+InlineSpaces = {InlineSpace}+
+InlineSpace = [\u0009 \u0020]
+LineBreak = \u000A | \u000D | \u000D\u000A
+
 wsItem = [\u0000 \u000B \u000C]
 comTextItem = [^\u000A \u000D]
 	// Integer and Floating Point Literal Macros:
@@ -84,23 +87,39 @@ HexFraction = \. {HexDigitsWithUnderscores}
 HexExponent = {FloatingPointP} {Sign}? {DecimalDigitsWithUnderscores}
 
 	// String Literal Macros:
-	// Escape sequences (character patterns for the escapes). The patterns *after* the backslash
-EscapeSequence0       = "0"
-EscapeSequenceBackslash = "\\"
-EscapeSequenceT       = "t"
-EscapeSequenceN       = "n"
-EscapeSequenceR       = "r"
-EscapeSequenceQuote   = "\""
-EscapeSequenceApostrophe = "'"
 
-UnicodeScalarDigits = {HexDigit}{1,8}
+StringLiteral = {StaticStringLiteral} | {InterpolatedStringLiteral}
+StringLiteralOpeningDelimiter = {ExtendedStringLiteralDelimiter}* "\""
+StringLiteralClosingDelimiter = "\""{ExtendedStringLiteralDelimiter}*
+StaticStringLiteral = {StringLiteralOpeningDelimiter} {QuotedText}* {StringLiteralClosingDelimiter} | {MultilineStringLiteralOpeningDelimiter} {MultilineQuotedText}* {MultilineStringLiteralClosingDelimiter}
+MultilineStringLiteralOpeningDelimiter = {ExtendedStringLiteralDelimiter}*"\"\"\""
+MultilineStringLiteralClosingDelimiter = "\"\"\""{ExtendedStringLiteralDelimiter}*
+ExtendedStringLiteralDelimiter = #+
+QuotedText = {QuotedTextItem}{QuotedText}*
+QuotedTextItem = {EscapedCharacter} | [^\"\u000A\u000D\\]]
+MultilineQuotedText = {QuotedTextItem}{QuotedText}*
+MultilineQuotedText = {MultilineQuotedTextItem}{MultilineQuotedText}*
+MultilineQuotedTextItem = {EscapedCharacter} | !\\ | {EscapedNewline}
+InterpolatedStringLiteral = {StringLiteralOpeningDelimiter}{InterpolatedText}*{StringLiteralClosingDelimiter}
+InterpolatedStringLiteral = {MultilineStringLiteralOpeningDelimiter}{MultilineInterpolatedText}*{MultilineStringLiteralClosingDelimiter}
+InterpolatedText = {InterpolatedTextItem} {InterpolatedText}*
+interpolatedTextItem = "\\("{Expression}")" | {QuotedTextItem}
+MultilineInterpolatedText = {MultilineInterpolatedTextItem} {MultilineInterpolatedText}*
+MultilineInterpolatedTextItem = "\\("{Expression}")" | {MultilineQuotedTextItem}
+EscapedNewline = {EscapeSequence} {InlineSpaces}* {LineBreak}
+
+
 EscapeSequenceUnicode = [uU] "{" {UnicodeScalarDigits} "}"
-AnyEscapedCharacterPattern = {EscapeSequence0} | {EscapeSequenceBackslash} | {EscapeSequenceT} | {EscapeSequenceN} | {EscapeSequenceR} | {EscapeSequenceQuote} | {EscapeSequenceApostrophe} | {EscapeSequenceUnicode}
+
+EscapeSequence = \\ {ExtendedDelimiter}
+EscapedCharacter = {EscapeSequence}(0 | \\ | t | n | r | \" | \') | {EscapeSequence} [uU] "{" {UnicodeScalarDigits} "}"
+UnicodeScalarDigits = {HexDigit}{1,8}
 EscapedNewlinePattern = \\ {inlineSp}* {LineTerm}
     // TODO: Check formatting and escaping of this rule... Specifically the escaped literal double-quote...
     //  IDE says syntax error when not escaped. JFlex may want not escaped...
 QuotedTextItemPattern_SingleLine = [^\u000A\u000D\"\\]
 MultilineQuotedTextItemPattern_Basic = [^\\]+
+
 ExtendedDelimiter = #+
 
 		// IDENTIFIER GRAMMAR SPEC 6.1
@@ -276,7 +295,7 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 	"#available" {return KW_PND_AVAILABLE;}
 	"#colorLiteral" {return KW_PND_COLORLITERAL;}
 	"#else" {return KW_PND_ELSE;}
-	"#elseif" {returnKW_PND_ELSEIF;}
+	"#elseif" {return KW_PND_ELSEIF;}
 	"#endif" {return KW_PND_ENDIF;}
 	"#fileLiteral" {return KW_PND_FILELITERAL;}
 	"#if" {return KW_PND_IF;}
@@ -288,6 +307,7 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 
 		// RULES: KEYWORDS reserved for DISTINCT USE.
 	"Any" {return KW_UPPER_ANY;}
+  "any" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_LOWER_ANY;}
 	"associatedtype" {return KW_ASSOCIATEDTYPE;}
 	"await" {return KW_AWAIT;}
 	"borrowing" {return KW_BORROWING;}
@@ -400,8 +420,6 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 
 	// RULES: --- OPERATORS AND PUNCTUATION (Fixed String Literals)
 		// The following tokens are reserved as punc and can’t be used as cust operators (, ), {, }, [, ], ., ,, :, ;, =, @, #, & (as a prefix operator), ->, `, ?, and ! (as postfix op).
-	"as!" {return OP_TYPE_CAST_BANG;}
-	"as?" {return OP_TYPE_CAST_OPT;}
 	"as" {return OP_TYPE_CAST;}
 	"is" {return OP_TYPE_CHECK;}
 	"&<<="  {return OP_OVERFLOW_BITSHIFT_LEFT_AND_ASSIGNMENT;}
@@ -478,6 +496,7 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 	":" {return COLON;}
 	";" {return SEMICOLON;}
 	"." {return DOT;}
+  "\\" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.BACKSLASH;}
 
 		// RULES: FIXIE SINGLE-CHARs that CAN ALSO START CUSTOM OPERATORS
 		//operator-head → / | = | - | + | ! | * | % | < | > | & | | | ^ | ~ | ?
@@ -590,7 +609,7 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 		// RULE: NESTED MULTILINE STRING START
 	"/*" {
 		stateStack.push(yystate());
-		yybegin(MULTILINE_COMMENT);
+		yybegin(MULTILINE_STRING);
 		return MULTILINE_STRING_START;
 	}
 
@@ -698,7 +717,7 @@ DotOperatorCharacter = \. | {OperatorCharacter}
 
     // RULE: NESTED MULTILINE COMMENT START
 	"/*" {stateStack.push(yystate());yybegin(MULTILINE_COMMENT);
-		  return MULTILINE_STRING_START;}
+		  return MULTILINE_COMMENT_START;}
 
 		// RULE: EXTENDED MULTILINE STRING CONTENT
 	(.|\n)+ {return STRING_TEXT;}
