@@ -83,17 +83,16 @@ Underscore = "_"
   //multiline-comment-text-item → comment-text-item
   //multiline-comment-text-item → Any Unicode scalar value except /* or */
 
-  WhiteSpace = {WhiteSpaceItem} {WhiteSpace}*
-  WhiteSpaceItem = {LineBreak} | {InlineSpace} | {Comment} | {MultilineComment} | [\u0000 \u000B \u000C]
+  WhiteSpace = {WhiteSpaceItem}+
+  WhiteSpaceItem = {LineBreak} | {InlineSpace} | [\u0000 \u000B \u000C]
   LineBreak = \u000A | \u000D | \u000D\u000A
-  InlineSpaces = {InlineSpace} {InlineSpaces}?
   InlineSpace = [\u0009 \u0020]
   Comment = {CommentText} {LineBreak}
-  MultilineComment ="/*" {MultilineCommentText} "*/"
-  CommentText = {CommentTextItem} {CommentText}?
+  CommentText = {CommentTextItem}+
   CommentTextItem = [^\u000A \u000D]
-  MultilineCommentText = {MultilineCommentTextItem} {MultilineCommentText}?
-  MultilineCommentTextItem = {MultilineComment} | {CommentTextItem} | [^ "/*" "*/"] // Any Unicode scalar value except /* or */
+  MultilineComment ="/*" {MultilineCommentText} "*/"
+  MultilineCommentText = {MultilineCommentTextItem}+
+  MultilineCommentTextItem = [^ "/*" "*/" ]
 
   // IDENTIFIER MACROS:
 
@@ -132,8 +131,7 @@ Underscore = "_"
   // The below format is structurally matched with the Swift Lang Reference's structure.
   // While condensing the ranges and using exclusions to save space is certainly possible, I'm gonna keep this format.
   // I believe this will enable easier maintenance upon language spec updates, and make it easier to cross-check with the reference.
-  Identifier = {IdentifierHead} {IdentifierCharacters}* | ` {IdentifierHead} {IdentifierCharacters}* ` | {ImplicitParameterName} | {PropertyWrapperProjection}
-  IdentifierList = {Identifier} | {Identifier} , {IdentifierList}
+  Identifier = {IdentifierHead} {IdentifierCharacters}? | ` {IdentifierHead} {IdentifierCharacters}? ` | {ImplicitParameterName} | {PropertyWrapperProjection}
   // One, Two: Latin supplement and spacing modifiers. Three, Four: Latin Ext, Greek, etc.
   // Five: General Punc/Format.
   // Six: SuperScript, SubScript, LetterlikeSymbols, Dingbats, whatnot.
@@ -163,15 +161,9 @@ Underscore = "_"
     ICDigit = {DecimalDigit}
     ICCombining = [\u0300-\u036F\u1DC0-\u1DFF\u20D0-\u20FF\uFE20-\uFE2F]
     IdentifierCharacter = {ICDigit} | {ICCombining} | {IdentifierHead}
-    IdentifierCharacters = {IdentifierCharacter} {IdentifierCharacters}*
+    IdentifierCharacters = {IdentifierCharacter}+
     ImplicitParameterName = "$" {DecimalDigits}
     PropertyWrapperProjection = "$" {IdentifierCharacters}
-
-  // LITERALS GRAMMAR SPEC 6.1
-  //  literal → numeric-literal | string-literal | regular-expression-literal | boolean-literal | nil-literal
-  //  numeric-literal → -? integer-literal | -? floating-point-literal
-  //  boolean-literal → true | false
-  //  nil-literal → nil
 
 	// INTEGER LITERAL MACROS:
 
@@ -198,23 +190,23 @@ Underscore = "_"
   //hexadecimal-literal-character → hexadecimal-digit | _
   //hexadecimal-literal-characters → hexadecimal-literal-character hexadecimal-literal-characters?
 
-  BinaryLiteral = "0b" {BinaryDigit} {BinaryLiteralCharacters}*
+  BinaryLiteral = "0b" {BinaryDigit} {BinaryLiteralCharacters}?
   BinaryDigit = [01]
-  BinaryLiteralCharacter = {BinaryDigit} | {Underscore}}
-  BinaryLiteralCharacters = {BinaryLiteralCharacter} {BinaryLiteralCharacters}*
-  OctalLiteral = [0o] {OctalDigit} {OctalLiteralCharacters}*
+  BinaryLiteralCharacter = {BinaryDigit} | {Underscore}
+  BinaryLiteralCharacters = {BinaryLiteralCharacter}+
+  OctalLiteral = [0o] {OctalDigit} {OctalLiteralCharacters}?
   OctalDigit = [0-7]
   OctalLiteralCharacter = {OctalDigit} | {Underscore}
-  OctalLiteralCharacters = {OctalLiteralCharacter} {OctalLiteralCharacters}*
-  DecimalLiteral = {DecimalDigit} {DecimalLiteralCharacters}*
+  OctalLiteralCharacters = {OctalLiteralCharacter}+
+  DecimalLiteral = {DecimalDigit} {DecimalLiteralCharacters}?
   DecimalDigit = [0-9]
-  DecimalDigits = {DecimalDigit} {DecimalDigits}*
+  DecimalDigits = {DecimalDigit} {DecimalDigit}*
   DecimalLiteralCharacter = {DecimalDigit} | {Underscore}
-  DecimalLiteralCharacters = {DecimalLiteralCharacter} {DecimalLiteralCharacters}*
-  HexLiteral = [] {HexDigit} {HexLiteralCaracters}*
+  DecimalLiteralCharacters = {DecimalLiteralCharacter}+
+  HexLiteral = [0x] {HexDigit} {HexLiteralCaracters}?
   HexDigit = [0-9a-fA-F]
   HexLiteralCaracter = {HexDigit} | {Underscore}
-  HexLiteralCaracters = {HexLiteralCaracter} {HexLiteralCaracters}*
+  HexLiteralCaracters = {HexLiteralCaracter}+
 
   // FLOATING POINT LITERAL MACROS:
 
@@ -232,7 +224,7 @@ Underscore = "_"
   FloatingPointLiteral = {DecimalLiteral} {DecimalFraction}* {DecimalExponent}? | {HexLiteral} {HexFraction}? {HexExponent}
   DecimalFraction = \. {DecimalLiteral}
   DecimalExponent = {FloatingPointE} {Sign}? {DecimalLiteral}
-  HexFraction = \. {HexDigit} {HexLiteralCaracters}*
+  HexFraction = \. {HexDigit} {HexLiteralCaracters}?
   HexExponent = {FloatingPointP} {Sign}? {DecimalLiteral}
   FloatingPointE = [eE]
   FloatingPointP = [pP]
@@ -269,28 +261,20 @@ Underscore = "_"
   //escaped-newline → escape-sequence inline-spaces? line-break
 
   StringLiteral = {StaticStringLiteral}
-  // | {InterpolatedStringLiteral}
-  StringLiteralOpeningDelimiter = {ExtendedStringLiteralDelimiter}* "\""
-  StringLiteralClosingDelimiter = "\""{ExtendedStringLiteralDelimiter}*
-  StaticStringLiteral = {StringLiteralOpeningDelimiter} {QuotedText}* {StringLiteralClosingDelimiter} | {MultilineStringLiteralOpeningDelimiter} {MultilineQuotedText}* {MultilineStringLiteralClosingDelimiter}
-  MultilineStringLiteralOpeningDelimiter = {ExtendedStringLiteralDelimiter}*"\"\"\""
-  MultilineStringLiteralClosingDelimiter = "\"\"\""{ExtendedStringLiteralDelimiter}*
+  StringLiteralOpeningDelimiter = {ExtendedStringLiteralDelimiter}? "\""
+  StringLiteralClosingDelimiter = "\""{ExtendedStringLiteralDelimiter}?
+  StaticStringLiteral = {StringLiteralOpeningDelimiter} {QuotedText}? {StringLiteralClosingDelimiter} | {MultilineStringLiteralOpeningDelimiter} {MultilineQuotedText}? {MultilineStringLiteralClosingDelimiter}
+  MultilineStringLiteralOpeningDelimiter = {ExtendedStringLiteralDelimiter}?"\"\"\""
+  MultilineStringLiteralClosingDelimiter = "\"\"\""{ExtendedStringLiteralDelimiter}?
   ExtendedStringLiteralDelimiter = #+
-  QuotedText = {QuotedTextItem}{QuotedText}*
+  QuotedText = {QuotedTextItem}+
   QuotedTextItem = {EscapedCharacter} | [^\"\u000A\u000D\\]]
-  MultilineQuotedText = {QuotedTextItem}{QuotedText}*
-  MultilineQuotedText = {MultilineQuotedTextItem}{MultilineQuotedText}*
+  MultilineQuotedText = {MultilineQuotedTextItem}+ | {QuotedTextItem}
   MultilineQuotedTextItem = {EscapedCharacter} | !\\ | {EscapedNewline}
-//  InterpolatedStringLiteral = {StringLiteralOpeningDelimiter}{InterpolatedText}*{StringLiteralClosingDelimiter}
-//  InterpolatedStringLiteral = {MultilineStringLiteralOpeningDelimiter}{MultilineInterpolatedText}*{MultilineStringLiteralClosingDelimiter}
-//  InterpolatedText = {InterpolatedTextItem} {InterpolatedText}*
-//  interpolatedTextItem = "\("{Expression}")" | {QuotedTextItem}
-//  MultilineInterpolatedText = {MultilineInterpolatedTextItem} {MultilineInterpolatedText}*
-//  MultilineInterpolatedTextItem = "\\("{Expression}")" | {MultilineQuotedTextItem}
-  EscapeSequence = "\\" {ExtendedStringLiteralDelimiter}
+  EscapeSequence = "\\" {ExtendedStringLiteralDelimiter}?
   EscapedCharacter = {EscapeSequence}(0 | \\ | t | n | r | \" | \') | {EscapeSequence} [uU] "{" {UnicodeScalarDigits} "}"
   UnicodeScalarDigits = {HexDigit}{1,8}
-  EscapedNewline = {EscapeSequence} {InlineSpaces}* {LineBreak}
+  EscapedNewline = {EscapeSequence} {InlineSpace}* {LineBreak}
 
   // REGEX LITERAL MACROS:
 
@@ -359,24 +343,10 @@ Underscore = "_"
   OCC_6 = [\u{E0100}-\u{E01EF}]
   OCCombining = {OCC_1_2_3} | {OCC_4} | {OCC_5} | {OCC_6}
   OperatorCharacter = {OperatorHead} | {OCCombining}
-  OperatorCharacters = {OperatorCharacter} {OperatorCharacter}*
+  OperatorCharacters = {OperatorCharacter}+
   DotOperatorHead = \.
   DotOperatorCharacter = \. | {OperatorCharacter}
-  DotOperatorCharacters = {DotOperatorCharacter} {DotOperatorCharacter}*
-
-  // ATTRIBUTE MACROS:
-
-  // ATTRIBUTE GRAMMAR SPEC 6.1
-  //  attribute → @ attribute-name attribute-argument-clause?
-  //  attribute-name → identifier
-  //  attribute-argument-clause → ( balanced-tokens? )
-  //  attributes → attribute attributes?
-  //  balanced-tokens → balanced-token balanced-tokens?
-  //  balanced-token → ( balanced-tokens? )
-  //  balanced-token → [ balanced-tokens? ]
-  //  balanced-token → { balanced-tokens? }
-  //  balanced-token → Any identifier, keyword, literal, or operator
-  //  balanced-token → Any punctuation except (, ), [, ], {, or }
+  DotOperatorCharacters = {DotOperatorCharacter}+
 
 	// JFlex Lexical State Declarations:
 %xstate INITIAL
@@ -395,7 +365,7 @@ Underscore = "_"
 	// Rules for <YYINITIAL> state
 <YYINITIAL> {
 
-		// STATE CHANGE: MULTILINE COMMENT START
+		 STATE CHANGE: MULTILINE COMMENT START
 
 	"/*" {
 		  stateStack.push(yystate());
@@ -522,19 +492,19 @@ Underscore = "_"
 	{Underscore} {return KW_UNDERSCORE;}
 
 	//RULES: --- FLOATING POINT LITERALS
-  // SPEC:	  FloatingPointLiteral = {DecimalLiteral} {DecimalFraction}? {DecimalExponent}? | {HexLiteral} {HexFraction}? {HexExponent}
 	{HexLiteral} {HexFraction}* {HexExponent} {return HEX_FLOATING_POINT_LITERAL;}
-	{DecimalLiteral} {DecimalFraction}* {DecimalExponent}* {return DECIMAL_FLOATING_POINT_LITERAL;}
+	{DecimalLiteral} {DecimalFraction}+ {return DECIMAL_FLOATING_POINT_LITERAL;}
 //  {FloatingPointLiteral} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.FLOATING_POINT_LITERAL;}
 
 	// RULES: --- INTEGER LITERALS
 	{BinaryLiteral} {return BINARY_LITERAL;}
 	{OctalLiteral}} {return OCTAL_LITERAL;}
 	{HexLiteral}} {return HEX_LITERAL;}
+      // TODO: CHECK WHY THIS CAN NEVER BE MATCHED
 	{DecimalLiteral} {return DECIMAL_LITERAL;}
 
   // RULE: --- REGEX LITERALS
-  {RegularExpressionLiteral} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.REGEXP_LITERAL;}
+//  {RegularExpressionLiteral} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.REGEXP_LITERAL;}
 
 	// RULES: --- OPERATORS AND PUNCTUATION (Fixed String Literals)
 		// The following tokens are reserved as punc and can’t be used as cust operators (, ), {, }, [, ], ., ,, :, ;, =, @, #, & (as a prefix operator), ->, `, ?, and ! (as postfix op).
@@ -642,18 +612,21 @@ Underscore = "_"
   //   NON-DOT OPERATORS: Matches "***" "+++" "<*>" etc.
   //   REGULAR IDENTIFIERS:
   // {DotOperatorHead} {DotOperatorCharacter}+ {return DOT_OPERATOR;}
+
+
+  // TODO: uncomment
 	{Operator} {return OPERATOR;}
 	{Identifier} {return IDENTIFIER;}
 
 	// RULES: --- String Literal Entry Rules
 
 	// EXT MULTILINE STRING
-	{ExtendedStringLiteralDelimiter}"\"\"\"" {
-		currentExtendedDelimiterLength = yytext().length() - 3;
-		stateStack.push(yystate());
-		yybegin(EXTENDED_MULTILINE_STRING);
-		return EXTENDED_MULTILINE_STRING_START;
-	}
+  {ExtendedStringLiteralDelimiter}"\"\"\"" {
+    currentExtendedDelimiterLength = yytext().length() - 3;
+    stateStack.push(yystate());
+    yybegin(EXTENDED_MULTILINE_STRING);
+    return EXTENDED_MULTILINE_STRING_START;
+  }
 
 	// MUTILINE STRING ENTRY
 	"\"\"\"" {
@@ -730,7 +703,7 @@ Underscore = "_"
 	}
 
 		// RULES: ESCAPE SEQs
-	{EscapedNewline} {return MULTILINE_STRING_ESCAPED_NEWLINE;}
+//	{EscapedNewline} {return MULTILINE_STRING_ESCAPED_NEWLINE;}
 	{EscapedCharacter} {return MULTILINE_STRING_ESCAPED_SEQUENCE;}
 
 		// RULE: MULTILINE STRING CONTENT
