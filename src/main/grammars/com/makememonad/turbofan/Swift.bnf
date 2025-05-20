@@ -45,18 +45,17 @@
   // elementTypeFactory()= com.makememonad.turbofan.language.swift.psi.stubs.SwiftStubElementTypeFactory.create
   }
   // GRAMMAR RULE DEFINITIONS:
-
   // RULES: LEXICAL STRUCTURE (Mainly handled in the JFlex with tokens redefined below...
-  // TODO: Check all of this against the existing JFlex setup and also the Swift 6.1 Spec and Grammar Summary...
-  swiftFile ::= declaration*
+  swiftFile ::= top-level-declaration?
+  top-level-declaration ::= statements
   identifier-list ::= IDENTIFIER (COMMA IDENTIFIER)*
-
   literal ::= numeric-literal | string-literal | regular-expression-literal | boolean-literal | nil-literal
   numeric-literal ::= OP_SUB? integer-literal | OP_SUB? floating-point-literal
   boolean-literal ::= KW_TRUE | KW_FALSE
   nil-literal ::= KW_NIL
   integer-literal ::= BINARY_LITERAL | OCTAL_LITERAL | DECIMAL_LITERAL | HEXADECIMAL_LITERAL
   floating-point-literal ::= DECIMAL_FLOATING_POINT_LITERAL | HEX_FLOATING_POINT_LITERAL
+
   // RULES: STRING LITERALS
   string-literal ::= static-string-literal | interpolated-string-literal
   //string-literal-opening-delimiter → extended-string-literal-delimiter? "
@@ -70,57 +69,56 @@
   interpolated-text-item ::= (STRING_INTERPOLATION_START expression STRING_INTERPOLATION_END) | STRING_TEXT
   multiline-interpolated-text ::= multiline-interpolated-text-item multiline-interpolated-text?
   multiline-interpolated-text-item ::= (STRING_INTERPOLATION_START expression STRING_INTERPOLATION_END) | MULTILINE_STRING_TEXT
+
   // RULES: REGEX LITERALS
   regular-expression-literal ::= REGEXP_LITERAL
   //regular-expression-literal-opening-delimiter → extended-regular-expression-literal-delimiter? /
   //regular-expression-literal-closing-delimiter → / extended-regular-expression-literal-delimiter?
   //extended-regular-expression-literal-delimiter → # extended-regular-expression-literal-delimiter?
+
   // RULES: OPERATOR LITERALS
   infix-operator ::= OPERATOR
   prefix-operator ::= OPERATOR
   postfix-operator ::= OPERATOR
+
   // RULES: TYPES
-
   // Type Intermediates
-  type ::= base-type (optional-type-suffix | implicitly-unwrapped-optional-type-suffix | metatype-type-suffix)?
-
-  base-type ::= function-type | array-type | dictionary-type | type-identifier | tuple-type | protocol-composition-type | opaque-type | KW_UPPER_ANY | KW_UPPER_SELF | (LPAREN type RPAREN)
+  type ::= (LPAREN? base-type RPAREN?) (optional-type-suffix | implicitly-unwrapped-optional-type-suffix | metatype-type-suffix)?
+  base-type ::= function-type | array-type | dictionary-type | type-identifier | tuple-type | protocol-composition-type | opaque-type | KW_UPPER_ANY | KW_UPPER_SELF
   optional-type-suffix ::= OP_QUESTION
   implicitly-unwrapped-optional-type-suffix ::= OP_NOT
   metatype-type-suffix ::= (DOT KW_UPPER_TYPE | DOT KW_UPPER_PROTOCOL)
-
   type-annotation ::= COLON attributes? KW_INOUT? type
   type-identifier ::= type-name generic-argument-clause? (DOT type-name generic-argument-clause?)*
   type-name ::= IDENTIFIER
   // Tuple Types
-  tuple-type ::= LPAREN (tuple-type-element COMMA tuple-type-element-list)? RPAREN
-  tuple-type-element-list ::= tuple-type-element (COMMA tuple-type-element)*
+  tuple-type ::= LPAREN (tuple-type-element (COMMA tuple-type-element)+)? RPAREN
   tuple-type-element ::= IDENTIFIER type-annotation | type
   // Function Types
   function-type ::= attributes? function-type-argument-clause KW_ASYNC? throws-clause? KW_FWD_ARROW type
   function-type-argument-clause ::= LPAREN (function-type-argument-list KW_ELLIPSIS?)? RPAREN
-  function-type-argument-list ::= function-type-argument | function-type-argument COMMA function-type-argument-list
+  function-type-argument-list ::= function-type-argument (COMMA function-type-argument)*
   function-type-argument ::= attributes? KW_INOUT? type | IDENTIFIER type-annotation
-  throws-clause ::= KW_THROWS | KW_THROWS LPAREN type RPAREN
+  throws-clause ::= KW_THROWS (LPAREN type RPAREN)?
   // Array Types
   array-type ::= LBRACKET type RBRACKET
   // Dict Types
   dictionary-type ::= LBRACKET type COLON type RBRACKET
   // Opt Types
   protocol-composition-type ::= (type-identifier (OP_BITWISE_AND type-identifier)+)
-  opaque-type ::= KW_SOME type
-  boxed-protocol-type ::= KW_LOWER_ANY type
+  opaque-type ::= (KW_SOME type)
+  boxed-protocol-type ::= (KW_LOWER_ANY type)
   type-inheritance-clause ::= COLON type-inheritance-list
   type-inheritance-list ::= attributes? type-identifier (COMMA attributes? type-identifier)*
   // RULES: EXPRESSIONS
   expression ::= try-operator? KW_AWAIT? prefix-expression infix-expressions?
   prefix-expression ::= prefix-operator? postfix-expression | in-out-expression
-  in-out-expression ::= OP_BITWISE_AND primary-expression
-  try-operator ::= KW_TRY | KW_TRY OP_QUESTION | KW_TRY OP_NOT
+  in-out-expression ::= (OP_BITWISE_AND primary-expression)
+  try-operator ::= KW_TRY (OP_QUESTION | OP_NOT)?
   infix-expression ::= infix-operator prefix-expression | OP_ASSIGNMENT try-operator? KW_AWAIT? prefix-expression | conditional-operator try-operator? KW_AWAIT? prefix-expression | type-casting-operator
   infix-expressions ::= infix-expression (infix-expression)*
   conditional-operator ::= (OP_QUESTION expression COLON)
-  type-casting-operator ::= (OP_TYPE_CHECK | OP_TYPE_CAST | OP_TYPE_CAST OP_QUESTION | OP_TYPE_CAST OP_NOT) type
+  type-casting-operator ::= (OP_TYPE_CHECK | OP_TYPE_CAST (OP_QUESTION | OP_NOT)?) type
   primary-expression ::= IDENTIFIER generic-argument-clause? | literal-expression | self-expression | superclass-expression | conditional-expression | closure-expression | parenthesized-expression | tuple-expression | implicit-member-expression | wildcard-expression | macro-expansion-expression | key-path-expression | selector-expression | key-path-string-expression
   literal-expression ::= literal | array-literal | dictionary-literal | playground-literal
   array-literal ::= (LBRACKET array-literal-items? COMMA? RBRACKET)
@@ -131,20 +129,15 @@
   playground-literal ::= (KW_PND_COLORLITERAL (LPAREN (("red" COLON expression) COMMA) (("green" COLON expression) COMMA) (("blue" COLON expression) COMMA) (("alpha" COLON expression) COMMA?) RPAREN)) | (KW_PND_FILELITERAL | KW_PND_IMAGELITERAL) (LPAREN "resourceName" COLON expression RPAREN)
   self-expression ::= KW_LOWER_SELF | self-method-expression | self-subscript-expression | self-initializer-expression
   self-method-expression ::= (KW_LOWER_SELF DOT IDENTIFIER)
-  self-subscript-expression ::= KW_LOWER_SELF LBRACKET function-call-argument-list RBRACKET
+  self-subscript-expression ::= KW_LOWER_SELF (LBRACKET function-call-argument-list RBRACKET)
   self-initializer-expression ::= (KW_LOWER_SELF DOT KW_INIT)
   superclass-expression ::= superclass-method-expression | superclass-subscript-expression | superclass-initializer-expression
   superclass-method-expression ::= (KW_SUPER DOT IDENTIFIER)
   superclass-subscript-expression ::= KW_SUPER LBRACKET function-call-argument-list RBRACKET
   superclass-initializer-expression ::= KW_SUPER DOT KW_INIT
   conditional-expression ::= if-expression | switch-expression
-
-
   if-expression ::= KW_IF condition-list (LBRACE statement RBRACE) if-expression-tail
-
   if-expression-tail ::= KW_ELSE (if-expression | LBRACE statement RBRACE)
-
-
   switch-expression ::= KW_SWITCH expression (LBRACE switch-expression-cases RBRACE)
   switch-expression-cases ::= switch-expression-case (switch-expression-case)*
   switch-expression-case ::= case-label statement | default-label statement
@@ -156,7 +149,6 @@
   capture-list ::= (LBRACKET capture-list-items RBRACKET)
   capture-list-items ::= capture-list-item (COMMA capture-list-item)*
   capture-list-item ::= capture-specifier? IDENTIFIER | capture-specifier? IDENTIFIER OP_ASSIGNMENT expression | capture-specifier? self-expression
-
   capture-specifier ::= KW_WEAK | KW_UNOWNED | KW_UNOWNED LPAREN KW_SAFE RPAREN | KW_UNOWNED LPAREN KW_UNSAFE RPAREN
   implicit-member-expression ::= DOT IDENTIFIER | DOT IDENTIFIER DOT postfix-expression
   parenthesized-expression ::= (LPAREN expression RPAREN)
@@ -164,9 +156,7 @@
   tuple-element-list ::= tuple-element (COMMA tuple-element)*
   tuple-element ::= expression | (IDENTIFIER COLON expression)
   wildcard-expression ::= OP_UNDERSCORE
-
   macro-expansion-expression ::= POUND IDENTIFIER generic-argument-clause? function-call-argument-clause? trailing-closures?
-
   key-path-expression ::= (BACKSLASH type? DOT key-path-components)
   key-path-components ::= key-path-component (DOT key-path-component)*
   key-path-component ::= IDENTIFIER key-path-postfixes? | key-path-postfixes
@@ -174,32 +164,21 @@
   key-path-postfix ::= OP_QUESTION | OP_NOT | KW_LOWER_SELF | (LBRACKET function-call-argument-list RBRACKET)
   selector-expression ::= KW_PND_SELECTOR (LPAREN expression RPAREN) | KW_PND_SELECTOR (LPAREN "getter" COLON expression RPAREN) | KW_PND_SELECTOR (LPAREN "setter" COLON expression RPAREN)
   key-path-string-expression ::= KW_PND_KEYPATH (LPAREN expression RPAREN)
-
-  postfix-expression ::= primary-expression | (postfix-expression postfix-operator) | function-call-expression | initializer-expression | explicit-member-expression | postfix-self-expression | subscript-expression | forced-value-expression | optional-chaining-expression
-
-//  function-call-expression ::=
-//  postfix-expression function-call-argument-clause
-//  | postfix-expression function-call-argument-clause? trailing-closures
-
-
-  function-call-expression ::= postfix-expression (function-call-argument-clause | (function-call-argument-clause? trailing-closures))
-
-  function-call-argument-clause ::= LPAREN RPAREN | LPAREN function-call-argument-list RPAREN
+  postfix-expression ::= base-postfix-expression (postfix-operator | function-call-expression | initializer-expression | explicit-member-expression | postfix-self-expression | subscript-expression | forced-value-expression | optional-chaining-expression)?
+  base-postfix-expression ::= primary-expression
+  function-call-expression ::= (function-call-argument-clause | (function-call-argument-clause? trailing-closures))
+  function-call-argument-clause ::= (LPAREN function-call-argument-list? RPAREN)
   function-call-argument-list ::= function-call-argument (COMMA function-call-argument)*
-  function-call-argument ::= (IDENTIFIER COLON )? expression | (IDENTIFIER COLON)? OPERATOR
+  function-call-argument ::= (IDENTIFIER COLON )? (expression | OPERATOR)
   trailing-closures ::= closure-expression (IDENTIFIER COLON closure-expression)*
-
-  initializer-expression ::= (postfix-expression DOT KW_INIT) (LPAREN argument-names RPAREN)?
-  explicit-member-expression ::= postfix-expression (DOT DECIMAL_LITERAL | DOT IDENTIFIER (LPAREN argument-names RPAREN | generic-argument-clause?) | conditional-compilation-block)
-
+  initializer-expression ::= (DOT KW_INIT) (LPAREN argument-names RPAREN)?
+  explicit-member-expression ::= (DOT DECIMAL_LITERAL | DOT IDENTIFIER (LPAREN argument-names RPAREN | generic-argument-clause?) | conditional-compilation-block)
   argument-names ::= argument-name (argument-name)*
   argument-name ::= (IDENTIFIER COLON)
-
-  postfix-self-expression ::= (postfix-expression DOT KW_LOWER_SELF)
-  subscript-expression ::= (postfix-expression (LBRACKET function-call-argument-list RBRACKET))
-  forced-value-expression ::= (postfix-expression OP_NOT)
-  optional-chaining-expression ::= (postfix-expression OP_QUESTION)
-
+  postfix-self-expression ::= (DOT KW_LOWER_SELF)
+  subscript-expression ::= (LBRACKET function-call-argument-list RBRACKET)
+  forced-value-expression ::= (OP_NOT)
+  optional-chaining-expression ::= (OP_QUESTION)
 
   // RULES: STATEMENTS
   statement ::= (expression | declaration | loop-statement | branch-statement | labeled-statement | control-transfer-statement | defer-statement | do-statement) SEMICOLON? | compiler-control-statement
@@ -244,7 +223,7 @@
   catch-clause ::= KW_CATCH catch-pattern-list? code-block
   catch-pattern-list ::= catch-pattern (COMMA catch-pattern)*
   catch-pattern ::= (pattern where-clause?)
-  compiler-control-statement ::= conditional-compilation-block | line-control-statement | diagnostic-statement
+  compiler-control-statement ::= conditional-compilation-block | line-control-statement
   conditional-compilation-block ::= if-directive-clause elseif-directive-clauses? else-directive-clause? endif-directive
   if-directive-clause ::= if-directive compilation-condition statements?
   elseif-directive-clauses ::= elseif-directive-clause (elseif-directive-clause)*
@@ -254,18 +233,14 @@
   elseif-directive ::= KW_PND_ELSEIF
   else-directive ::= KW_PND_ELSE
   endif-directive ::= KW_PND_ENDIF
-
-
-  compilation-condition ::= platform-condition | IDENTIFIER | boolean-literal | (LPAREN compilation-condition RPAREN) | (OP_NOT compilation-condition) | (compilation-condition (OP_LOGICAL_AND | OP_LOGICAL_OR) compilation-condition)
-
-
-  platform-condition ::= "os" (LPAREN operating-system RPAREN) | "arch" (LPAREN architecture RPAREN) | "swift" ((LPAREN OP_GREATER_THAN_OR_EQ swift-version RPAREN) | (LPAREN OP_LANGLE swift-version RPAREN)) | "compiler" ((LPAREN OP_LESS_THAN_OR_EQ swift-version RPAREN) | (LPAREN OP_LANGLE swift-version RPAREN)) | "canImport" (LPAREN import-path RPAREN) | "targetEnvironment" (LPAREN environment RPAREN)
+  compilation-condition ::= base-compilation-condition | (LPAREN base-compilation-condition RPAREN) | (base-compilation-condition (OP_LOGICAL_AND | OP_LOGICAL_OR) base-compilation-condition)
+  base-compilation-condition ::= platform-condition | IDENTIFIER | boolean-literal | (OP_NOT compilation-condition)
+  platform-condition ::= "os" (LPAREN operating-system RPAREN) | "arch" (LPAREN architecture RPAREN) | "swift" (LPAREN (OP_GREATER_THAN_OR_EQ | OP_LANGLE) swift-version RPAREN) | "compiler" (LPAREN (OP_LESS_THAN_OR_EQ | OP_LANGLE) swift-version RPAREN) | "canImport" (LPAREN import-path RPAREN) | "targetEnvironment" (LPAREN environment RPAREN)
   operating-system ::= "macOS" | "iOS" | "watchOS" | "tvOS" | "visionOS" | "Linux" | "Windows"
   architecture ::= "i386" | "x86_64" | "arm" | "arm64"
-  swift-version ::= DECIMAL_LITERAL swift-version-continuation?
-  swift-version-continuation ::= DOT DECIMAL_LITERAL (DOT DECIMAL_LITERAL)?
+  swift-version ::= DECIMAL_LITERAL (DOT DECIMAL_LITERAL)*
   environment ::= "simulator" | "macCatalyst"
-  line-control-statement ::= KW_PND_SOURCELOCATION (LPAREN "file" COLON file-path COMMA "line" COLON line-number RPAREN) | KW_PND_SOURCELOCATION (LPAREN RPAREN)
+  line-control-statement ::= KW_PND_SOURCELOCATION (LPAREN ("file" COLON file-path COMMA "line" COLON line-number)? RPAREN)
   line-number ::= DECIMAL_LITERAL
   file-path ::= static-string-literal
   availability-condition ::= KW_PND_AVAILABLE (LPAREN availability-arguments RPAREN) | KW_PND_UNAVAILABLE (LPAREN availability-arguments RPAREN)
@@ -274,7 +249,6 @@
   platform-name ::= "iOS" | "iOSApplicationExtension" | "macOS" | "macOSApplicationExtension" | "macCatalyst" | "macCatalystApplicationExtension" | "watchOS" | "watchOSApplicationExtension" | "tvOS" | "tvOSApplicationExtension" | "visionOS" | "visionOSApplicationExtension"
   // RULES: DECLARATIONS
   declaration ::= import-declaration | constant-declaration | variable-declaration | typealias-declaration | function-declaration | enum-declaration | struct-declaration | class-declaration | actor-declaration | protocol-declaration | initializer-declaration | deinitializer-declaration | extension-declaration | subscript-declaration | operator-declaration | precedence-group-declaration
-  top-level-declaration ::= statements?
   code-block ::= (LBRACE statements? RBRACE)
   import-declaration ::= attributes? KW_IMPORT import-kind? import-path
   import-kind ::= KW_TYPEALIAS | KW_STRUCT | KW_CLASS | KW_ENUM | KW_LOWER_PROTOCOL_DECL | KW_LET | KW_VAR | KW_FUNC
@@ -283,7 +257,6 @@
   pattern-initializer-list ::= pattern-initializer (COMMA pattern-initializer)*
   pattern-initializer ::= (pattern initializer?)
   initializer ::= OP_ASSIGNMENT expression
-
   variable-declaration ::= variable-declaration-head (pattern-initializer-list | variable-name (type-annotation (code-block | getter-setter-block | getter-setter-keyword-block ) | initializer willSet-didSet-block | type-annotation initializer? willSet-didSet-block))
   variable-declaration-head ::= attributes? declaration-modifiers? KW_VAR
   variable-name ::= IDENTIFIER
@@ -300,7 +273,6 @@
   typealias-declaration ::= attributes? access-level-modifier? KW_TYPEALIAS typealias-name generic-parameter-clause? typealias-assignment
   typealias-name ::= IDENTIFIER
   typealias-assignment ::= OP_ASSIGNMENT type
-
   function-declaration ::= function-head function-name generic-parameter-clause? function-signature generic-where-clause?  code-block?
   function-head ::= attributes? declaration-modifiers? KW_FUNC
   function-name ::= IDENTIFIER | OPERATOR
@@ -313,7 +285,6 @@
   parameter-type-annotation ::= COLON attributes? parameter-modifier? type
   parameter-modifier ::= KW_INOUT | KW_BORROWING | KW_CONSUMING
   default-argument-clause ::= OP_ASSIGNMENT expression
-
   enum-declaration ::= attributes? access-level-modifier? (union-style-enum | raw-value-style-enum)
   union-style-enum ::= (KW_INDIRECT? KW_ENUM enum-name) generic-parameter-clause? type-inheritance-clause? generic-where-clause? (LBRACE union-style-enum-members? RBRACE)
   union-style-enum-members ::= union-style-enum-member (union-style-enum-member)*
@@ -344,18 +315,19 @@
   actor-body ::= (LBRACE actor-members? RBRACE)
   actor-members ::= actor-member (actor-member)*
   actor-member ::= declaration | compiler-control-statement
-
   protocol-declaration ::= attributes? access-level-modifier? KW_LOWER_PROTOCOL_DECL IDENTIFIER type-inheritance-clause? generic-where-clause? protocol-body
   protocol-body ::= (LBRACE protocol-members? RBRACE)
   protocol-members ::= protocol-member (protocol-member)*
   protocol-member ::= protocol-member-declaration | compiler-control-statement
-  protocol-member-declaration ::= protocol-property-declaration | protocol-method-declaration | protocol-initializer-declaration | protocol-subscript-declaration | protocol-associated-type-declaration | typealias-declaration | variable-declaration-head variable-name type-annotation getter-setter-keyword-block
+  protocol-member-declaration ::=
+  // protocol-property-declaration |
+  protocol-method-declaration | protocol-initializer-declaration | protocol-subscript-declaration | protocol-associated-type-declaration | typealias-declaration | variable-declaration-head variable-name type-annotation getter-setter-keyword-block
+
   protocol-method-declaration ::= function-head function-name generic-parameter-clause? function-signature generic-where-clause?
   protocol-initializer-declaration ::= initializer-head generic-parameter-clause? parameter-clause throws-clause? generic-where-clause? | initializer-head generic-parameter-clause? parameter-clause KW_RETHROWS generic-where-clause?
   protocol-subscript-declaration ::= subscript-head subscript-result generic-where-clause? getter-setter-keyword-block
   protocol-associated-type-declaration ::= attributes? access-level-modifier? KW_ASSOCIATEDTYPE typealias-name type-inheritance-clause? typealias-assignment? generic-where-clause?
   initializer-declaration ::= initializer-head generic-parameter-clause? parameter-clause KW_ASYNC? (KW_RETHROWS | throws-clause?) generic-where-clause? code-block
-
   initializer-head ::= (attributes? declaration-modifiers? (KW_INIT (OP_QUESTION | OP_NOT)? ))
   deinitializer-declaration ::= (attributes? KW_DEINIT code-block)
   extension-declaration ::= attributes? access-level-modifier? KW_EXTENSION type-identifier type-inheritance-clause? generic-where-clause? extension-body
@@ -372,32 +344,30 @@
   macro-definition ::= (OP_ASSIGNMENT expression)
 
   operator-declaration ::= prefix-operator-declaration | postfix-operator-declaration | infix-operator-declaration
-
-  prefix-operator-declaration ::= KW_PREFIX KW_OPERATOR operator
-  postfix-operator-declaration ::= KW_POSTFIX KW_OPERATOR operator
-  infix-operator-declaration ::= KW_INFIX KW_OPERATOR operator infix-operator-group?
-
+  prefix-operator-declaration ::= KW_PREFIX KW_OPERATOR OPERATOR
+  postfix-operator-declaration ::= KW_POSTFIX KW_OPERATOR OPERATOR
+  infix-operator-declaration ::= KW_INFIX KW_OPERATOR OPERATOR infix-operator-group?
   infix-operator-group ::= (COLON precedence-group-name)
   precedence-group-declaration ::= KW_PRECEDENCEGROUP precedence-group-name (LBRACE precedence-group-attributes? RBRACE)
   precedence-group-attributes ::= precedence-group-attribute (precedence-group-attribute)*
   precedence-group-attribute ::= precedence-group-relation | precedence-group-assignment | precedence-group-associativity
   precedence-group-relation ::= (KW_HIGHER_THAN COLON |  KW_LOWER_THAN COLON) precedence-group-names
   precedence-group-assignment ::= KW_ASSIGNMENT COLON boolean-literal
-  precedence-group-associativity ::= KW_ASSOCIATIVITY COLON "left" | KW_ASSOCIATIVITY COLON "right" | KW_ASSOCIATIVITY COLON "none"
+  precedence-group-associativity ::= (KW_ASSOCIATIVITY COLON ("left" | "right" | "none"))
   precedence-group-names ::= precedence-group-name (COMMA precedence-group-name)*
   precedence-group-name ::= IDENTIFIER
-  declaration-modifier ::= KW_CLASS | KW_CONVENIENCE | KW_DYNAMIC | KW_FINAL | KW_INFIX | KW_LAZY | KW_OPTIONAL | KW_OVERRIDE | KW_POSTFIX | KW_PREFIX | KW_REQUIRED | KW_STATIC | KW_UNOWNED | KW_UNOWNED LPAREN KW_SAFE RPAREN | KW_UNOWNED LPAREN KW_UNSAFE RPAREN | KW_WEAK | access-level-modifier | mutation-modifier | KW_NONISOLATED
+  declaration-modifier ::= KW_CLASS | KW_CONVENIENCE | KW_DYNAMIC | KW_FINAL | KW_INFIX | KW_LAZY | KW_OPTIONAL | KW_OVERRIDE | KW_POSTFIX | KW_PREFIX | KW_REQUIRED | KW_STATIC | KW_UNOWNED (LPAREN (KW_SAFE | KW_UNSAFE) RPAREN)? | KW_WEAK | access-level-modifier | mutation-modifier | KW_NONISOLATED
   declaration-modifiers ::= declaration-modifier (declaration-modifier)*
   access-level-modifier ::= KW_PRIVATE (LPAREN KW_SET RPAREN)? | KW_FILEPRIVATE (LPAREN KW_SET RPAREN)? | KW_INTERNAL (LPAREN KW_SET RPAREN)? | KW_PACKAGE (LPAREN KW_SET RPAREN)? | KW_PUBLIC (LPAREN KW_SET RPAREN)? | KW_OPEN (LPAREN KW_SET RPAREN)?
   mutation-modifier ::= KW_MUTATING | KW_NONMUTATING
+
   // RULES: ATTRIBUTES
   attribute ::= (OP_AT IDENTIFIER attribute-argument-clause?)
   attribute-argument-clause ::= (LPAREN balanced-tokens? RPAREN)
   attributes ::= attribute (attribute)*
   balanced-tokens ::= balanced-token (balanced-token)*
-  balanced-token ::= LPAREN balanced-tokens? RPAREN | LBRACKET balanced-tokens? RBRACKET | LBRACE balanced-tokens? RBRACE
-
-// balanced-token → Any identifier, keyword, literal, or operator | Any punctuation except (, ), [, ], {, or }
+  balanced-token ::= base-balanced-token | ((LPAREN | LBRACKET | LBRACE) base-balanced-token? (RPAREN | RBRACKET | RBRACE))
+  base-balanced-token ::= IDENTIFIER | any-keyword | literal | OPERATOR | balanced-token-punctuation
 
   // RULES: PATTERNS
   pattern ::= base-pattern type-casting-suffix?
@@ -419,6 +389,7 @@
   enum-case-pattern ::= type-identifier? DOT enum-case-name tuple-pattern?
   optional-pattern ::= identifier-pattern OP_QUESTION
   expression-pattern ::= expression
+
   // RULES: GENERIC PARAMETERS and ARGUMENTS
   generic-parameter-clause ::= (OP_LANGLE generic-parameter-list OP_RANGLE)
   generic-parameter-list ::= generic-parameter (COMMA generic-parameter)*
@@ -431,6 +402,186 @@
   generic-argument-clause ::= (OP_LANGLE generic-argument-list OP_RANGLE)
   generic-argument-list ::= generic-argument (COMMA generic-argument)*
   generic-argument ::= type
+
+  // RULES:
+any-keyword ::=
+  KW_PND_AVAILABLE
+  | KW_PND_COLORLITERAL
+  | KW_PND_ELSE
+  | KW_PND_ELSEIF
+  | KW_PND_ENDIF
+  | KW_PND_FILELITERAL
+  | KW_PND_IF
+  | KW_PND_IMAGELITERAL
+  | KW_PND_KEYPATH
+  | KW_PND_SELECTOR
+  | KW_PND_SOURCELOCATION
+  | KW_PND_UNAVAILABLE
+  | KW_UPPER_ANY
+  | KW_LOWER_ANY
+  | KW_ASSOCIATEDTYPE
+  | KW_AWAIT
+  | KW_BORROWING
+  | KW_BREAK
+  | KW_CASE
+  | KW_CLASS
+  | KW_CONSUMING
+  | KW_CONTINUE
+  | KW_DEFAULT
+  | KW_DEFER
+  | KW_DEINIT
+  | KW_DO
+  | KW_ELSE
+  | KW_ENUM
+  | KW_EXTENSION
+  | KW_FALLTHROUGH
+  | KW_FALSE
+  | KW_FILEPRIVATE
+  | KW_FOR
+  | KW_FUNC
+  | KW_GUARD
+  | KW_IF
+  | KW_IMPORT
+  | KW_IN
+  | KW_INIT
+  | KW_INOUT
+  | KW_INTERNAL
+  | KW_LET
+  | KW_NIL
+  | KW_NONISOLATED
+  | KW_OPEN
+  | KW_OPERATOR
+  | KW_PRECEDENCEGROUP
+  | KW_PRIVATE
+  | KW_LOWER_PROTOCOL_DECL
+  | KW_PUBLIC
+  | KW_REPEAT
+  | KW_RETURN
+  | KW_LOWER_SELF
+  | KW_UPPER_SELF
+  | KW_STATIC
+  | KW_STRUCT
+  | KW_SUPER
+  | KW_SWITCH
+  | KW_SUBSCRIPT
+  | KW_THROWS
+  | KW_TRUE
+  | KW_TRY
+  | KW_TYPEALIAS
+  | KW_VAR
+  | KW_WHERE
+  | KW_WHILE
+  | KW_CATCH
+  | KW_THROW
+  | KW_RETHROWS
+  | KW_ASSOCIATIVITY
+  | KW_ASYNC
+  | KW_CONVENIENCE
+  | KW_DIDSET
+  | KW_DYNAMIC
+  | KW_FINAL
+  | KW_GET
+  | KW_INDIRECT
+  | KW_INFIX
+  | KW_LAZY
+  | KW_LEFT
+  | KW_MUTATING
+  | KW_NONE
+  | KW_NONMUTATING
+  | KW_OPTIONAL
+  | KW_OVERRIDE
+  | KW_PACKAGE
+  | KW_POSTFIX
+  | KW_PRECEDENCE
+  | KW_PREFIX
+  | KW_UPPER_PROTOCOL
+  | KW_REQUIRED
+  | KW_RIGHT
+  | KW_SET
+  | KW_SOME
+  | KW_UPPER_TYPE
+  | KW_UNOWNED
+  | KW_WEAK
+  | KW_WILLSET
+
+// balanced-token-punctuation can be any punctuation except (, ), [, ], {, or }
+  balanced-token-punctuation ::=
+  KW_UNDERSCORE
+  | OP_TYPE_CAST_BANG
+  | OP_TYPE_CAST_OPT
+  | OP_TYPE_CAST
+  | OP_TYPE_CHECK
+  | OP_OVERFLOW_BITSHIFT_LEFT_AND_ASSIGNMENT
+  | OP_OVERFLOW_BITSHIFT_RIGHT_AND_ASSIGNMENT
+  | OP_TRIPLE_LANGLE
+  | OP_TRIPLE_RANGLE
+  | OP_IDENTICAL
+  | OP_NOT_IDENTICAL
+  | OP_BITSHIFT_LEFT_AND_ASSIGNMENT
+  | OP_BITSHIFT_RIGHT_AND_ASSIGNMENT
+  | OP_OVERFLOW_BITSHIFT_LEFT
+  | OP_OVERFLOW_BITSHIFT_RIGHT
+  | OP_HALFOPEN_RANGE
+  | OP_CLOSED_RANGE
+  | OP_POINTWISE_EQ
+  | OP_POINTWISE_NOT_EQ
+  | OP_OVERFLOW_ADD_AND_ASSIGNMENT
+  | OP_OVERFLOW_SUB_AND_ASSIGNMENT
+  | OP_OVERFLOW_MULT_AND_ASSIGNMENT
+  | OP_POINTWISE_BITWISE_AND_AND_ASSIGNMENT
+  | OP_POINTWISE_BITWISE_OR_AND_ASSIGNMENT
+  | OP_POINTWISE_BITWISE_XOR_AND_ASSIGNMENT
+  | OP_POINTWISE_LESS_THAN_OR_EQ
+  | OP_POINTWISE_GREATER_THAN_OR_EQ
+  | OP_EQ
+  | OP_LOGICAL_AND
+  | OP_OVERFLOW_ADD
+  | OP_OVERFLOW_SUB
+  | OP_OVERFLOW_MULT
+  | OP_BITWISE_AND_ASSIGNMENT
+  | OP_BITWISE_OR_ASSIGNMENT
+  | OP_BITWISE_XOR_ASSIGNMENT
+  | OP_PATTERN_MATCH
+  | OP_NOT_EQ
+  | OP_BITSHIFT_LEFT
+  | OP_BITSHIFT_RIGHT
+  | OP_LESS_THAN_OR_EQ
+  | OP_GREATER_THAN_OR_EQ
+  | OP_POINTWISE_LESS_THAN
+  | OP_POINTWISE_GREATER_THAN
+  | OP_ADD_ASSIGNMENT
+  | OP_SUB_ASSIGNMENT
+  | OP_MULT_ASSIGNMENT
+  | OP_DIV_ASSIGNMENT
+  | OP_MODULO_ASSIGNMENT
+  | OP_LOGICAL_OR
+  | OP_POINTWISE_BITWISE_OR
+  | OP_POINTWISE_BITWISE_XOR
+  | OP_POINTWISE_NOT
+  | OP_NIL_COALESCING
+  | OP_TERNARY_CONDITIONAL
+  | FWD_ARROW
+  | AT_SYMBOL
+  | POUND
+  | COMMA
+  | COLON
+  | SEMICOLON
+  | DOT
+  | BACKSLASH
+  | FWDSLASH
+  | OP_ASSIGNMENT
+  | OP_ADD
+  | OP_SUB
+  | OP_MULT
+  | OP_MODULO
+  | OP_NOT
+  | OP_LANGLE
+  | OP_RANGLE
+  | OP_BITWISE_AND
+  | OP_BITWISE_OR
+  | OP_BITWISE_XOR
+  | OP_BITWISE_NOT
+  | OP_QUESTION
 
   // LEXICAL TOKEN DEFINITIONS:
 

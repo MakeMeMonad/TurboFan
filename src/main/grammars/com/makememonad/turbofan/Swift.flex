@@ -364,6 +364,20 @@ Underscore = "_"
   DotOperatorCharacter = \. | {OperatorCharacter}
   DotOperatorCharacters = {DotOperatorCharacter} {DotOperatorCharacter}*
 
+  // ATTRIBUTE MACROS:
+
+  // ATTRIBUTE GRAMMAR SPEC 6.1
+  //  attribute → @ attribute-name attribute-argument-clause?
+  //  attribute-name → identifier
+  //  attribute-argument-clause → ( balanced-tokens? )
+  //  attributes → attribute attributes?
+  //  balanced-tokens → balanced-token balanced-tokens?
+  //  balanced-token → ( balanced-tokens? )
+  //  balanced-token → [ balanced-tokens? ]
+  //  balanced-token → { balanced-tokens? }
+  //  balanced-token → Any identifier, keyword, literal, or operator
+  //  balanced-token → Any punctuation except (, ), [, ], {, or }
+
 	// JFlex Lexical State Declarations:
 %xstate INITIAL
 %xstate STRING
