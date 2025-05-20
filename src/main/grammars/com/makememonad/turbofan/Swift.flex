@@ -289,7 +289,7 @@ Underscore = "_"
   RegularExpression = ([^/ \\ \n]|\\.)*
   RegularExpressionLiteralOpeningDelimiter = {ExtendedRegularExpressionLiteralDelimiter}? "/"
   RegularExpressionLiteralClosingDelimiter = "/" {ExtendedRegularExpressionLiteralDelimiter}?
-  ExtendedRegularExpressionLiteralDelimiter = # {ExtendedRegularExpressionLiteralDelimiter}?
+  ExtendedRegularExpressionLiteralDelimiter = #+
 
   // OPERATOR MACROS:
 
@@ -398,7 +398,7 @@ Underscore = "_"
 
 		// RULES: KEYWORDS reserved for DISTINCT USE.
 	"Any" {return KW_UPPER_ANY;}
-  "any" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.KW_LOWER_ANY;}
+  "any" {return KW_LOWER_ANY;}
 	"associatedtype" {return KW_ASSOCIATEDTYPE;}
 	"await" {return KW_AWAIT;}
 	"borrowing" {return KW_BORROWING;}
@@ -500,11 +500,10 @@ Underscore = "_"
 	{BinaryLiteral} {return BINARY_LITERAL;}
 	{OctalLiteral}} {return OCTAL_LITERAL;}
 	{HexLiteral}} {return HEX_LITERAL;}
-      // TODO: CHECK WHY THIS CAN NEVER BE MATCHED
 	{DecimalLiteral} {return DECIMAL_LITERAL;}
 
   // RULE: --- REGEX LITERALS
-//  {RegularExpressionLiteral} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.REGEXP_LITERAL;}
+  {RegularExpressionLiteral} {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.REGEXP_LITERAL;}
 
 	// RULES: --- OPERATORS AND PUNCTUATION (Fixed String Literals)
 		// The following tokens are reserved as punc and can’t be used as cust operators (, ), {, }, [, ], ., ,, :, ;, =, @, #, & (as a prefix operator), ->, `, ?, and ! (as postfix op).
@@ -584,10 +583,9 @@ Underscore = "_"
 	":" {return COLON;}
 	";" {return SEMICOLON;}
 	"." {return DOT;}
-  "\\" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.BACKSLASH;}
+  "\\" {return BACKSLASH;}
 
 		// RULES: FIXIE SINGLE-CHARs that CAN ALSO START CUSTOM OPERATORS
-		//operator-head → / | = | - | + | ! | * | % | < | > | & | | | ^ | ~ | ?
 	"/" {return FWDSLASH;}
 	"=" {return OP_ASSIGNMENT;}
 	"+" { return OP_ADD; }
