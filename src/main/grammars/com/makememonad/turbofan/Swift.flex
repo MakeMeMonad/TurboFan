@@ -28,13 +28,16 @@ package com.makememonad.turbofan.language.swift.psi.lexer;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
+import com.makememonad.turbofan.language.swift.psi.SwiftTypes;
+import static com.makememonad.turbofan.language.swift.psi.SwiftTypes.*;
+import com.intellij.psi.TokenType.*;
 import static com.intellij.psi.TokenType.BAD_CHARACTER;
 import static com.intellij.psi.TokenType.WHITE_SPACE;
-import static com.makememonad.turbofan.language.swift.psi.SwiftTypes.*;
 
 %%
   // --- JFlex Section 2: OPTIONS, CUSTOM CODE, MACRO DECLARATIONS
     // JFlex Scanner Option Switches:
+    %public
 %class SwiftLexer
 %implements FlexLexer
 %unicode
