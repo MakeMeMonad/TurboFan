@@ -13,7 +13,7 @@
         <postStartupActivity implementation="com.github.makememonad.turbofan.startup.MyProjectActivity" />
         <fileType
                 name="Swift File"
-                implementationClass="com.github.makememonad.turbofan.language.swift.SwiftFileType"
+                implementationClass="com.github.makememonad.turbofan.language.swift.psi.impl.SwiftFileType"
                 fieldName="INSTANCE"
                 language="swift"
                 extensions="swift;swiftinterface"
@@ -22,5 +22,6 @@
                 patterns="*.swift;*.swiftinterface"
                 hashBangs=""
         />
+        <lang.parserDefinition language="swift" implementationClass="com.makememonad.turbofan.language.swift.SwiftParserDefinition"/>
     </extensions>
 </idea-plugin>

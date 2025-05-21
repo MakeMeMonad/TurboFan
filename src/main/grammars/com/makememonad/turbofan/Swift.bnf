@@ -35,7 +35,7 @@
   // e.g., Swift<RuleName> for interfaces
   psiClassPrefix="Swift"
   // e.g., SwiftImpl<RuleName> for implementations
-  psiImplClassSuffix="SwiftImpl"
+  psiImplClassSuffix="ImplGen"
   // Where PSI interfaces go
   psiPackage="com.makememonad.turbofan.language.swift.psi"
   // Where PSI impls go
