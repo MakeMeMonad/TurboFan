@@ -52,7 +52,120 @@
   identifier-list ::= IDENTIFIER (COMMA IDENTIFIER)*
 
   // RULES: TOP LEVEL WITH CUSTOMIZED INTERFACES
-  function-declaration ::= function-head function-name generic-parameter-clause? function-signature generic-where-clause?  code-block? {
+  declaration-name::= IDENTIFIER
+
+
+  // RULES: ATTRIBUTES
+  attribute ::= (OP_AT attribute-name attribute-argument-clause?) {
+    methods [
+      String getName()
+      PsiElement getNameIdentifier()
+      PsiElement setName(String name)
+      PsiReference getReference()
+      ItemPresentation getPresentation()
+      PsiElement getDocumentationTarget()
+    ]
+  }
+  attribute-name ::= IDENTIFIER
+  private attribute-argument-clause ::= (LPAREN balanced-tokens? RPAREN)
+  private attributes ::= attribute (attribute)*
+
+  // RULES: ACTOR DECLARATION
+  actor-declaration ::= attributes? access-level-modifier? KW_ACTOR actor-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? actor-body {
+    methods [
+      String getName()
+      PsiElement getNameIdentifier()
+      PsiElement setName(String name)
+      PsiReference getReference()
+      ItemPresentation getPresentation()
+      PsiElement getDocumentationTarget()
+    ]
+  }
+  actor-name ::= IDENTIFIER
+  private actor-body ::= (LBRACE actor-members? RBRACE)
+  private actor-members ::= actor-member (actor-member)*
+  private actor-member ::= declaration | compiler-control-statement
+
+    // RULES: CLASS DECLARATION
+  class-declaration ::= attributes? class-access KW_CLASS class-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? class-body {
+  methods [
+    String getName()
+    PsiElement getNameIdentifier()
+    PsiElement setName(String name)
+    PsiReference getReference()
+    ItemPresentation getPresentation()
+    PsiElement getDocumentationTarget()
+  ]
+  }
+  class-name ::= IDENTIFIER
+  private class-access ::= (KW_FINAL access-level-modifier?) | (access-level-modifier? KW_FINAL?)
+  private class-body ::= (LBRACE class-members? RBRACE)
+  class-members ::= class-member (class-member)*
+  private class-member ::= declaration | compiler-control-statement
+
+
+  constant-declaration ::= attributes? declaration-modifiers? KW_LET pattern-initializer-list {
+  methods [
+    List<String> getDeclaredNames()
+    List<PsiElement> getDeclaredIdentifiers()
+    PsiReference getReference()
+    ItemPresentation getPresentation()
+    PsiElement getDocumentationTarget()
+   ]
+  }
+  pattern-initializer-list ::= pattern-initializer (COMMA pattern-initializer)*
+  private pattern-initializer ::= (pattern initializer?)
+  private initializer ::= OP_ASSIGNMENT expression
+
+  // RULES: DECLARATION MODIFIERS
+  declaration-modifiers ::= declaration-modifier (declaration-modifier)* {
+    methods [
+    ]
+  }
+  private declaration-modifier ::= KW_CLASS | KW_CONVENIENCE | KW_DYNAMIC | KW_FINAL | KW_INFIX | KW_LAZY | KW_OPTIONAL | KW_OVERRIDE | KW_POSTFIX | KW_PREFIX | KW_REQUIRED | KW_STATIC | KW_UNOWNED (LPAREN (KW_SAFE | KW_UNSAFE) RPAREN)? | KW_WEAK | access-level-modifier | mutation-modifier | KW_NONISOLATED
+  private access-level-modifier ::= KW_PRIVATE (LPAREN KW_SET RPAREN)? | KW_FILEPRIVATE (LPAREN KW_SET RPAREN)? | KW_INTERNAL (LPAREN KW_SET RPAREN)? | KW_PACKAGE (LPAREN KW_SET RPAREN)? | KW_PUBLIC (LPAREN KW_SET RPAREN)? | KW_OPEN (LPAREN KW_SET RPAREN)?
+  private mutation-modifier ::= KW_MUTATING | KW_NONMUTATING
+
+  // RULES: ENUM DECLARATION
+  enum-declaration ::= attributes? access-level-modifier? (union-style-enum | raw-value-style-enum) {
+    methods [
+      String getName()
+      PsiElement getNameIdentifier()
+      PsiElement setName(String name)
+      PsiReference getReference()
+      ItemPresentation getPresentation()
+      PsiElement getDocumentationTarget()
+   ]
+  }
+  union-style-enum ::= (KW_INDIRECT? KW_ENUM enum-declaration-name) generic-parameter-clause? type-inheritance-clause? generic-where-clause? (LBRACE union-style-enum-members? RBRACE)
+  private union-style-enum-members ::= union-style-enum-member (union-style-enum-member)*
+  private union-style-enum-member ::= declaration | union-style-enum-case-clause | compiler-control-statement
+  private union-style-enum-case-clause ::= attributes? KW_INDIRECT? KW_CASE union-style-enum-case-list
+  private union-style-enum-case-list ::= union-style-enum-case (COMMA union-style-enum-case)*
+  private union-style-enum-case ::= enum-case-name tuple-type?
+  enum-declaration-name ::= IDENTIFIER
+  enum-case-name ::= IDENTIFIER
+  raw-value-style-enum ::= KW_ENUM enum-declaration-name generic-parameter-clause? type-inheritance-clause generic-where-clause? (LBRACE raw-value-style-enum-members RBRACE)
+  private raw-value-style-enum-members ::= raw-value-style-enum-member (raw-value-style-enum-member)*
+  private raw-value-style-enum-member ::= declaration | raw-value-style-enum-case-clause | compiler-control-statement
+  private raw-value-style-enum-case-clause ::= attributes? KW_CASE raw-value-style-enum-case-list
+  private raw-value-style-enum-case-list ::= raw-value-style-enum-case (COMMA raw-value-style-enum-case)*
+  private raw-value-style-enum-case ::= enum-case-name raw-value-assignment?
+  private raw-value-assignment ::= (OP_ASSIGNMENT raw-value-literal)
+  private raw-value-literal ::= numeric-literal | static-string-literal | boolean-literal
+
+    // RULES: EXTENSION DECLARATION
+  extension-declaration ::= attributes? access-level-modifier? KW_EXTENSION type-identifier type-inheritance-clause? generic-where-clause? extension-body {
+    methods [
+    ItemPresentation getPresentation()
+    ]
+  }
+    private extension-body ::= (LBRACE extension-members? RBRACE)
+    extension-members ::= extension-member (extension-member)*
+    private extension-member ::= declaration | compiler-control-statement
+
+    // RULES: FUNCTION DECLARATION
+  function-declaration ::= function-head function-declaration-name generic-parameter-clause? function-signature generic-where-clause?  code-block? {
     methods [
     String getName()
     PsiElement getNameIdentifier()
@@ -69,131 +182,159 @@
     boolean isStatic()
     ]
   }
-  enum-declaration ::= attributes? access-level-modifier? (union-style-enum | raw-value-style-enum) {
+  private function-head ::= attributes? declaration-modifiers? KW_FUNC
+  function-declaration-name ::= IDENTIFIER | OPERATOR
+  private function-signature ::= parameter-clause KW_ASYNC? (KW_RETHROWS | throws-clause?) function-result?
+  private function-result ::= (KW_FWD_ARROW attributes? type)
+  private parameter-clause ::= (LPAREN parameter-list? RPAREN)
+  private parameter-list ::= parameter (COMMA parameter)*
+  private parameter ::= external-parameter-name? IDENTIFIER parameter-type-annotation (KW_ELLIPSIS | default-argument-clause?)?
+  private external-parameter-name ::= IDENTIFIER
+  // internal-parameter-name ::= CHECK THE SPEC AND MAYBE BRING THIS BACK
+  private parameter-type-annotation ::= COLON attributes? parameter-modifier? type
+  private parameter-modifier ::= KW_INOUT | KW_BORROWING | KW_CONSUMING
+  private default-argument-clause ::= OP_ASSIGNMENT expression
+
+  // RULES: IMPORT DECLARATION
+  import-declaration ::= attributes? KW_IMPORT import-kind? import-path {
     methods [
     String getName()
     PsiElement getNameIdentifier()
-    PsiElement setName(String name)
+    PsiReference getReference()
     ItemPresentation getPresentation()
-    ]
+    PsiElement getDocumentationTarget()    ]
   }
-  import-declaration ::= attributes? KW_IMPORT import-kind? import-path {
-      methods [
-      String getName()
-      PsiElement getNameIdentifier()
-      PsiElement setName(String name)
-      ItemPresentation getPresentation()
-      ]
-  }
-  constant-declaration ::= attributes? declaration-modifiers? KW_LET pattern-initializer-list {
-      methods [
-      String getName()
-      PsiElement getNameIdentifier()
-      PsiElement setName(String name)
-      ItemPresentation getPresentation()
-      ]
-  }
-  variable-declaration ::= variable-declaration-head (pattern-initializer-list | variable-name (type-annotation (code-block | getter-setter-block | getter-setter-keyword-block ) | initializer willSet-didSet-block | type-annotation initializer? willSet-didSet-block)) {
-      methods [
-      String getName()
-      PsiElement getNameIdentifier()
-      PsiElement setName(String name)
-      ItemPresentation getPresentation()
-      ]
-  }
-  typealias-declaration ::= attributes? access-level-modifier? KW_TYPEALIAS typealias-name generic-parameter-clause? typealias-assignment {
-      methods [
-      String getName()
-      PsiElement getNameIdentifier()
-      PsiElement setName(String name)
-      ItemPresentation getPresentation()
-      ]
-  }
-  struct-declaration ::= attributes? access-level-modifier? KW_STRUCT IDENTIFIER generic-parameter-clause? type-inheritance-clause? generic-where-clause? struct-body {
-      methods [
-      String getName()
-      PsiElement getNameIdentifier()
-      PsiElement setName(String name)
-      ItemPresentation getPresentation()
-      ]
-  }
-  class-declaration ::= attributes? class-access KW_CLASS IDENTIFIER generic-parameter-clause? type-inheritance-clause? generic-where-clause? class-body {
-      methods [
-      String getName()
-      PsiElement getNameIdentifier()
-      PsiElement setName(String name)
-      ItemPresentation getPresentation()
-      ]
-  }
-  actor-declaration ::= attributes? access-level-modifier? KW_ACTOR IDENTIFIER generic-parameter-clause? type-inheritance-clause? generic-where-clause? actor-body {
-      methods [
-      String getName()
-      PsiElement getNameIdentifier()
-      PsiElement setName(String name)
-      ItemPresentation getPresentation()
-      ]
-  }
-  protocol-declaration ::= attributes? access-level-modifier? KW_LOWER_PROTOCOL_DECL IDENTIFIER type-inheritance-clause? generic-where-clause? protocol-body {
-      methods [
-      String getName()
-      PsiElement getNameIdentifier()
-      PsiElement setName(String name)
-      ItemPresentation getPresentation()
-      ]
-  }
-  initializer-declaration ::= initializer-head generic-parameter-clause? parameter-clause KW_ASYNC? (KW_RETHROWS | throws-clause?) generic-where-clause? code-block {
-      methods [
-      String getName()
-      PsiElement getNameIdentifier()
-      PsiElement setName(String name)
-      ItemPresentation getPresentation()
-      ]
-  }
+  import-kind ::= KW_TYPEALIAS | KW_STRUCT | KW_CLASS | KW_ENUM | KW_LOWER_PROTOCOL_DECL | KW_LET | KW_VAR | KW_FUNC
+  import-path ::= IDENTIFIER (DOT IDENTIFIER)?
+
+  // RULES: INIT AND DEINIT DECLARATION
   deinitializer-declaration ::= (attributes? KW_DEINIT code-block) {
       methods [
       ]
   }
-  extension-declaration ::= attributes? access-level-modifier? KW_EXTENSION type-identifier type-inheritance-clause? generic-where-clause? extension-body {
+  initializer-declaration ::= initializer-head generic-parameter-clause? parameter-clause KW_ASYNC? (KW_RETHROWS | throws-clause?) generic-where-clause? code-block {
+    methods [
+    PsiReference getReference()
+    ItemPresentation getPresentation()
+    PsiElement getDocumentationTarget()    ]
+  }
+  private initializer-head ::= (attributes? declaration-modifiers? (KW_INIT (OP_QUESTION | OP_NOT)? ))
+
+  // RULES: MACRO DECLARATION
+  macro-declaration ::= macro-head macro-name generic-parameter-clause? macro-signature macro-definition? generic-where-clause {
     methods [
     String getName()
     PsiElement getNameIdentifier()
     PsiElement setName(String name)
+    PsiReference getReference()
     ItemPresentation getPresentation()
+    PsiElement getDocumentationTarget()
     ]
   }
+  macro-name ::= IDENTIFIER
+  private macro-head ::= (attributes? declaration-modifiers? KW_MACRO)
+  private macro-signature ::= (parameter-clause (KW_FWD_ARROW type)?)
+  private macro-definition ::= (OP_ASSIGNMENT expression)
+
+    // RULES: OPERATOR DECLARATION
+  operator-declaration ::= prefix-operator-declaration | postfix-operator-declaration | infix-operator-declaration {
+    methods [
+    ]
+  }
+    private prefix-operator-declaration ::= KW_PREFIX KW_OPERATOR OPERATOR
+    private postfix-operator-declaration ::= KW_POSTFIX KW_OPERATOR OPERATOR
+    private infix-operator-declaration ::= KW_INFIX KW_OPERATOR OPERATOR infix-operator-group?
+    private infix-operator-group ::= (COLON precedence-group-name)
+
+
+  precedence-group-declaration ::= KW_PRECEDENCEGROUP precedence-group-name (LBRACE precedence-group-attributes? RBRACE) {
+  methods [
+    String getName()
+    PsiElement getNameIdentifier()
+    PsiElement setName(String name)
+    PsiReference getReference()
+    ItemPresentation getPresentation()
+    PsiElement getDocumentationTarget()
+    ]
+  }
+
+    // RULES: PROTOCOL DECLARATION
+  protocol-declaration ::= attributes? access-level-modifier? KW_LOWER_PROTOCOL_DECL protocol-name type-inheritance-clause? generic-where-clause? protocol-body {
+    methods [
+    String getName()
+    PsiElement getNameIdentifier()
+    PsiElement setName(String name)
+    PsiReference getReference()
+    ItemPresentation getPresentation()
+    PsiElement getDocumentationTarget()
+    ]
+  }
+  protocol-name ::= IDENTIFIER
+  private protocol-body ::= (LBRACE protocol-members? RBRACE)
+  private protocol-members ::= protocol-member (protocol-member)*
+  private protocol-member ::= protocol-member-declaration | compiler-control-statement
+  private protocol-member-declaration ::=
+  // protocol-property-declaration |
+  protocol-method-declaration | protocol-initializer-declaration | protocol-subscript-declaration | protocol-associated-type-declaration | typealias-declaration | variable-declaration-head variable-name type-annotation getter-setter-keyword-block
+  private protocol-method-declaration ::= function-head function-declaration-name generic-parameter-clause? function-signature generic-where-clause?
+  private protocol-initializer-declaration ::= initializer-head generic-parameter-clause? parameter-clause throws-clause? generic-where-clause? | initializer-head generic-parameter-clause? parameter-clause KW_RETHROWS generic-where-clause?
+  private protocol-subscript-declaration ::= subscript-head subscript-result generic-where-clause? getter-setter-keyword-block
+  private protocol-associated-type-declaration ::= attributes? access-level-modifier? KW_ASSOCIATEDTYPE typealias-name type-inheritance-clause? typealias-assignment? generic-where-clause?
+
+    // RULES: STRUCT DECLARATION
+  struct-declaration ::= attributes? access-level-modifier? KW_STRUCT struct-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? struct-body {
+  methods [
+    String getName()
+    PsiElement getNameIdentifier()
+    PsiElement setName(String name)
+    PsiReference getReference()
+    ItemPresentation getPresentation()
+    PsiElement getDocumentationTarget()
+  ]
+  }
+    struct-name ::= IDENTIFIER
+    private struct-body ::= (LBRACE struct-members? RBRACE)
+    private struct-members ::= struct-member (struct-member)*
+    private struct-member ::= declaration | compiler-control-statement
+
+    // RULES: SUBSCRIPT DECLARATION
   subscript-declaration ::= subscript-head subscript-result generic-where-clause? (code-block | getter-setter-block | getter-setter-keyword-block) {
       methods [
       ]
   }
-  macro-declaration ::= macro-head IDENTIFIER generic-parameter-clause? macro-signature macro-definition? generic-where-clause {
-      methods [
-      ]
-  }
-  operator-declaration ::= prefix-operator-declaration | postfix-operator-declaration | infix-operator-declaration {
-      methods [
-      ]
-  }
-  precedence-group-declaration ::= KW_PRECEDENCEGROUP precedence-group-name (LBRACE precedence-group-attributes? RBRACE) {
-      methods [
-      ]
-  }
-  declaration-modifiers ::= declaration-modifier (declaration-modifier)* {
-      methods [
-      ]
-  }
-  attribute ::= (OP_AT IDENTIFIER attribute-argument-clause?) {
-      methods [
+    private subscript-head ::= attributes? declaration-modifiers? KW_SUBSCRIPT generic-parameter-clause? parameter-clause
+    private subscript-result ::= (KW_FWD_ARROW attributes? type)
+
+  // RULES: TYPEALIAS DECLARATION
+  typealias-declaration ::= attributes? access-level-modifier? KW_TYPEALIAS typealias-name generic-parameter-clause? typealias-assignment {
+    methods [
       String getName()
       PsiElement getNameIdentifier()
       PsiElement setName(String name)
+      PsiReference getReference()
       ItemPresentation getPresentation()
-      ]
+      PsiElement getDocumentationTarget()
+    ]
   }
+    typealias-name ::= IDENTIFIER
+    typealias-assignment ::= OP_ASSIGNMENT type
 
-  // RULES: TOP LEVEL WITHOUT CUSTOMIZED INTERFACES
+  // RULES: VARIABLE DECLARATION
+  variable-declaration ::= variable-declaration-head (pattern-initializer-list | variable-name (type-annotation (code-block | getter-setter-block | getter-setter-keyword-block ) | initializer willSet-didSet-block | type-annotation initializer? willSet-didSet-block)) {
+    methods [
+      String getName()
+      PsiElement getNameIdentifier()
+      PsiElement setName(String name)
+      PsiReference getReference()
+      ItemPresentation getPresentation()
+      PsiElement getDocumentationTarget()
+    ]
+  }
+  variable-declaration-head ::= attributes? declaration-modifiers? KW_VAR
+  variable-name ::= IDENTIFIER
 
 
-
+  // RULES: LITERALS
 
   // RULES: LITERAL GROUPS
   literal ::= numeric-literal | string-literal | regular-expression-literal | boolean-literal | nil-literal
@@ -228,6 +369,7 @@
   prefix-operator ::= OPERATOR
   postfix-operator ::= OPERATOR
 
+
   // RULES: TYPES
   type ::= (LPAREN? base-type RPAREN?) (optional-type-suffix | implicitly-unwrapped-optional-type-suffix | metatype-type-suffix)?
   private base-type ::= function-type | array-type | dictionary-type | type-identifier | tuple-type | protocol-composition-type | opaque-type | KW_UPPER_ANY | KW_UPPER_SELF
@@ -241,12 +383,11 @@
   private tuple-type ::= LPAREN (tuple-type-element (COMMA tuple-type-element)+)? RPAREN
   private tuple-type-element ::= IDENTIFIER type-annotation | type
   // RULES: FUNCTION TYPE
-  function-type ::= attributes? function-arguments-clause KW_ASYNC? throws-clause? KW_FWD_ARROW function-return-type
+  function-type ::= attributes? function-arguments-clause KW_ASYNC? throws-clause? KW_FWD_ARROW type
   private function-arguments-clause ::= LPAREN (function-arguments-list KW_ELLIPSIS?)? RPAREN
   function-arguments-list ::= function-argument (COMMA function-argument)*
   function-argument ::= attributes? KW_INOUT? type | IDENTIFIER type-annotation
   private throws-clause ::= KW_THROWS (LPAREN type RPAREN)?
-  function-return-type ::= type
   // RULES: ARRAY TYPE
   private array-type ::= LBRACKET type RBRACKET
   // RULES: DICT TYPE
@@ -257,6 +398,7 @@
   boxed-protocol-type ::= (KW_LOWER_ANY type)
   type-inheritance-clause ::= COLON type-inheritance-list
   private type-inheritance-list ::= attributes? type-identifier (COMMA attributes? type-identifier)*
+
 
   // RULES: EXPRESSIONS
   expression ::= try-operator? KW_AWAIT? prefix-expression infix-expressions?
@@ -314,7 +456,7 @@
   private key-path-string-expression ::= KW_PND_KEYPATH (LPAREN expression RPAREN)
   private postfix-expression ::= base-postfix-expression (postfix-operator | function-call-expression | initializer-expression | explicit-member-expression | postfix-self-expression | subscript-expression | forced-value-expression | optional-chaining-expression)?
   private base-postfix-expression ::= primary-expression
-  function-call-expression ::= (function-call-argument-clause | (function-call-argument-clause? trailing-closures))
+  private function-call-expression ::= (function-call-argument-clause | (function-call-argument-clause? trailing-closures))
   private function-call-argument-clause ::= (LPAREN function-call-argument-list? RPAREN)
   private function-call-argument-list ::= function-call-argument (COMMA function-call-argument)*
   private function-call-argument ::= (IDENTIFIER COLON )? (expression | OPERATOR)
@@ -328,49 +470,50 @@
   private forced-value-expression ::= (OP_NOT)
   private optional-chaining-expression ::= (OP_QUESTION)
 
+
   // RULES: STATEMENTS
   statement ::= (expression | declaration | loop-statement | branch-statement | labeled-statement | control-transfer-statement | defer-statement | do-statement) SEMICOLON? | compiler-control-statement
   statements ::= statement (statement)*
-  loop-statement ::= for-in-statement | while-statement | repeat-while-statement
-  for-in-statement ::= KW_FOR KW_CASE? pattern KW_IN expression where-clause? code-block
-  while-statement ::= KW_WHILE condition-list code-block
+  private loop-statement ::= for-in-statement | while-statement | repeat-while-statement
+  private for-in-statement ::= KW_FOR KW_CASE? pattern KW_IN expression where-clause? code-block
+  private while-statement ::= KW_WHILE condition-list code-block
   condition-list ::= condition (COMMA condition)*
-  condition ::= expression | availability-condition | case-condition | optional-binding-condition
-  case-condition ::= KW_CASE pattern initializer
-  optional-binding-condition ::= (KW_LET | KW_VAR) pattern initializer?
-  repeat-while-statement ::= KW_REPEAT code-block KW_WHILE expression
-  branch-statement ::= if-statement | guard-statement | switch-statement
-  if-statement ::= KW_IF condition-list code-block else-clause?
-  else-clause ::= KW_ELSE (code-block | if-statement)
-  guard-statement ::= KW_GUARD condition-list KW_ELSE code-block
-  switch-statement ::= switch expression (LBRACE switch-cases? RBRACE)
-  switch-cases ::= switch-case (switch-case)*
-  switch-case ::= case-label statements | default-label statements | conditional-switch-case
-  case-label ::= attributes? KW_CASE case-item-list COLON
-  case-item-list ::= pattern where-clause? (COMMA pattern where-clause?)*
-  default-label ::= attributes? (KW_DEFAULT COLON)
+  private condition ::= expression | availability-condition | case-condition | optional-binding-condition
+  private case-condition ::= KW_CASE pattern initializer
+  private optional-binding-condition ::= (KW_LET | KW_VAR) pattern initializer?
+  private repeat-while-statement ::= KW_REPEAT code-block KW_WHILE expression
+  private branch-statement ::= if-statement | guard-statement | switch-statement
+  private if-statement ::= KW_IF condition-list code-block else-clause?
+  private else-clause ::= KW_ELSE (code-block | if-statement)
+  private guard-statement ::= KW_GUARD condition-list KW_ELSE code-block
+  private switch-statement ::= switch expression (LBRACE switch-cases? RBRACE)
+  private switch-cases ::= switch-case (switch-case)*
+  private switch-case ::= case-label statements | default-label statements | conditional-switch-case
+  private case-label ::= attributes? KW_CASE case-item-list COLON
+  private case-item-list ::= pattern where-clause? (COMMA pattern where-clause?)*
+  private default-label ::= attributes? (KW_DEFAULT COLON)
   where-clause ::= (KW_WHERE where-expression)
-  where-expression ::= expression
+  private where-expression ::= expression
   conditional-switch-case ::= switch-if-directive-clause switch-elseif-directive-clauses? switch-else-directive-clause? endif-directive
-  switch-if-directive-clause ::= if-directive compilation-condition switch-cases?
-  switch-elseif-directive-clauses ::= elseif-directive-clause (elseif-directive-clause)*
-  switch-elseif-directive-clause ::= elseif-directive compilation-condition switch-cases?
-  switch-else-directive-clause ::= else-directive switch-cases?
+  private switch-if-directive-clause ::= if-directive compilation-condition switch-cases?
+  private switch-elseif-directive-clauses ::= elseif-directive-clause (elseif-directive-clause)*
+  private switch-elseif-directive-clause ::= elseif-directive compilation-condition switch-cases?
+  private switch-else-directive-clause ::= else-directive switch-cases?
   labeled-statement ::= statement-label (loop-statement | if-statement | switch-statement | do-statement)
   statement-label ::= (label-name COLON)
   label-name ::= IDENTIFIER
   control-transfer-statement ::= break-statement | continue-statement | fallthrough-statement | return-statement | throw-statement
-  break-statement ::= KW_BREAK label-name?
-  continue-statement ::= KW_CONTINUE label-name?
-  fallthrough-statement ::= KW_FALLTHROUGH
-  return-statement ::= return expression?
-  throw-statement ::= throw expression
+  private break-statement ::= KW_BREAK label-name?
+  private continue-statement ::= KW_CONTINUE label-name?
+  private fallthrough-statement ::= KW_FALLTHROUGH
+  private return-statement ::= return expression?
+  private throw-statement ::= throw expression
   defer-statement ::= KW_DEFER code-block
-  do-statement ::= KW_DO throws-clause? code-block catch-clauses?
-  catch-clauses ::= catch-clause (catch-clause)*
-  catch-clause ::= KW_CATCH catch-pattern-list? code-block
-  catch-pattern-list ::= catch-pattern (COMMA catch-pattern)*
-  catch-pattern ::= (pattern where-clause?)
+  private do-statement ::= KW_DO throws-clause? code-block catch-clauses?
+  private catch-clauses ::= catch-clause (catch-clause)*
+  private catch-clause ::= KW_CATCH catch-pattern-list? code-block
+  private catch-pattern-list ::= catch-pattern (COMMA catch-pattern)*
+  private catch-pattern ::= (pattern where-clause?)
   compiler-control-statement ::= conditional-compilation-block | line-control-statement
   conditional-compilation-block ::= if-directive-clause elseif-directive-clauses? else-directive-clause? endif-directive
   private if-directive-clause ::= if-directive compilation-condition statements?
@@ -396,16 +539,10 @@
   private availability-argument ::= platform-name (DECIMAL_LITERAL | DECIMAL_FLOATING_POINT_LITERAL) | OP_MULT
   private platform-name ::= "iOS" | "iOSApplicationExtension" | "macOS" | "macOSApplicationExtension" | "macCatalyst" | "macCatalystApplicationExtension" | "watchOS" | "watchOSApplicationExtension" | "tvOS" | "tvOSApplicationExtension" | "visionOS" | "visionOSApplicationExtension"
 
+
   // RULES: DECLARATIONS
   declaration ::= import-declaration | constant-declaration | variable-declaration | typealias-declaration | function-declaration | enum-declaration | struct-declaration | class-declaration | actor-declaration | protocol-declaration | initializer-declaration | deinitializer-declaration | extension-declaration | subscript-declaration | operator-declaration | precedence-group-declaration
   code-block ::= (LBRACE statements? RBRACE)
-  import-kind ::= KW_TYPEALIAS | KW_STRUCT | KW_CLASS | KW_ENUM | KW_LOWER_PROTOCOL_DECL | KW_LET | KW_VAR | KW_FUNC
-  import-path ::= IDENTIFIER (DOT import-path)?
-  pattern-initializer-list ::= pattern-initializer (COMMA pattern-initializer)*
-  pattern-initializer ::= (pattern initializer?)
-  initializer ::= OP_ASSIGNMENT expression
-  variable-declaration-head ::= attributes? declaration-modifiers? KW_VAR
-  variable-name ::= IDENTIFIER
   getter-setter-block ::= code-block | (LBRACE getter-clause setter-clause? RBRACE) | (LBRACE setter-clause getter-clause RBRACE)
   getter-clause ::= attributes? mutation-modifier? KW_GET code-block
   setter-clause ::= attributes? mutation-modifier? KW_SET setter-name? code-block
@@ -416,91 +553,6 @@
   willSet-didSet-block ::= (LBRACE willSet-clause didSet-clause? RBRACE) | (LBRACE didSet-clause willSet-clause? RBRACE)
   willSet-clause ::= attributes? KW_WILLSET setter-name? code-block
   didSet-clause ::= attributes? KW_DIDSET setter-name? code-block
-  typealias-name ::= IDENTIFIER
-  typealias-assignment ::= OP_ASSIGNMENT type
-
-    // RULES: FUNCTION DECLARATION
-  private function-head ::= attributes? declaration-modifiers? KW_FUNC
-  private function-name ::= IDENTIFIER | OPERATOR
-  private function-signature ::= parameter-clause KW_ASYNC? (KW_RETHROWS | throws-clause?) function-result?
-  private function-result ::= (KW_FWD_ARROW attributes? type)
-  private parameter-clause ::= (LPAREN parameter-list? RPAREN)
-  private parameter-list ::= parameter (COMMA parameter)*
-  private parameter ::= external-parameter-name? IDENTIFIER parameter-type-annotation (KW_ELLIPSIS | default-argument-clause?)?
-  private external-parameter-name ::= IDENTIFIER
-  private parameter-type-annotation ::= COLON attributes? parameter-modifier? type
-  private parameter-modifier ::= KW_INOUT | KW_BORROWING | KW_CONSUMING
-  private default-argument-clause ::= OP_ASSIGNMENT expression
-
-  // RULES: ENUM DECLARATION
-  private union-style-enum ::= (KW_INDIRECT? KW_ENUM enum-name) generic-parameter-clause? type-inheritance-clause? generic-where-clause? (LBRACE union-style-enum-members? RBRACE)
-  private union-style-enum-members ::= union-style-enum-member (union-style-enum-member)*
-  private union-style-enum-member ::= declaration | union-style-enum-case-clause | compiler-control-statement
-  private union-style-enum-case-clause ::= attributes? KW_INDIRECT? KW_CASE union-style-enum-case-list
-  private union-style-enum-case-list ::= union-style-enum-case (COMMA union-style-enum-case)*
-  private union-style-enum-case ::= enum-case-name tuple-type?
-  private enum-name ::= IDENTIFIER
-  private enum-case-name ::= IDENTIFIER
-  private raw-value-style-enum ::= KW_ENUM enum-name generic-parameter-clause? type-inheritance-clause generic-where-clause? (LBRACE raw-value-style-enum-members RBRACE)
-  private raw-value-style-enum-members ::= raw-value-style-enum-member (raw-value-style-enum-member)*
-  private raw-value-style-enum-member ::= declaration | raw-value-style-enum-case-clause | compiler-control-statement
-  private raw-value-style-enum-case-clause ::= attributes? KW_CASE raw-value-style-enum-case-list
-  private raw-value-style-enum-case-list ::= raw-value-style-enum-case (COMMA raw-value-style-enum-case)*
-  private raw-value-style-enum-case ::= enum-case-name raw-value-assignment?
-  private raw-value-assignment ::= (OP_ASSIGNMENT raw-value-literal)
-  private raw-value-literal ::= numeric-literal | static-string-literal | boolean-literal
-
-  // RULES: STRUCT DECLARATION
-  private struct-body ::= (LBRACE struct-members? RBRACE)
-  private struct-members ::= struct-member (struct-member)*
-  private struct-member ::= declaration | compiler-control-statement
-
-  // RULES: CLASS DECLARATION
-  private class-access ::= (KW_FINAL access-level-modifier?) | (access-level-modifier? KW_FINAL?)
-  private class-body ::= (LBRACE class-members? RBRACE)
-  class-members ::= class-member (class-member)*
-  private class-member ::= declaration | compiler-control-statement
-
-  // RULES: ACTOR DECLARATION
-  private actor-body ::= (LBRACE actor-members? RBRACE)
-  private actor-members ::= actor-member (actor-member)*
-  private actor-member ::= declaration | compiler-control-statement
-
-    // RULES: PROTOCOL DECLARATION
-  private protocol-body ::= (LBRACE protocol-members? RBRACE)
-  private protocol-members ::= protocol-member (protocol-member)*
-  private protocol-member ::= protocol-member-declaration | compiler-control-statement
-  private protocol-member-declaration ::=
-  // protocol-property-declaration |
-  protocol-method-declaration | protocol-initializer-declaration | protocol-subscript-declaration | protocol-associated-type-declaration | typealias-declaration | variable-declaration-head variable-name type-annotation getter-setter-keyword-block
-
-  private protocol-method-declaration ::= function-head function-name generic-parameter-clause? function-signature generic-where-clause?
-  private protocol-initializer-declaration ::= initializer-head generic-parameter-clause? parameter-clause throws-clause? generic-where-clause? | initializer-head generic-parameter-clause? parameter-clause KW_RETHROWS generic-where-clause?
-  private protocol-subscript-declaration ::= subscript-head subscript-result generic-where-clause? getter-setter-keyword-block
-  private protocol-associated-type-declaration ::= attributes? access-level-modifier? KW_ASSOCIATEDTYPE typealias-name type-inheritance-clause? typealias-assignment? generic-where-clause?
-
-  // RULES: INIT AND DEINIT DECLARATION
-  private initializer-head ::= (attributes? declaration-modifiers? (KW_INIT (OP_QUESTION | OP_NOT)? ))
-
-  // RULES: EXTENSION DECLARATION
-  private extension-body ::= (LBRACE extension-members? RBRACE)
-  extension-members ::= extension-member (extension-member)*
-  private extension-member ::= declaration | compiler-control-statement
-
-  // RULES: SUBSCRIPT DECLARATION
-  private subscript-head ::= attributes? declaration-modifiers? KW_SUBSCRIPT generic-parameter-clause? parameter-clause
-  private subscript-result ::= (KW_FWD_ARROW attributes? type)
-
-  // RULES: MACRO DECLARATION
-  private macro-head ::= (attributes? declaration-modifiers? KW_MACRO)
-  private macro-signature ::= (parameter-clause (KW_FWD_ARROW type)?)
-  private macro-definition ::= (OP_ASSIGNMENT expression)
-
-  // RULES: OPERATOR DECLARATION
-  private prefix-operator-declaration ::= KW_PREFIX KW_OPERATOR OPERATOR
-  private postfix-operator-declaration ::= KW_POSTFIX KW_OPERATOR OPERATOR
-  private infix-operator-declaration ::= KW_INFIX KW_OPERATOR OPERATOR infix-operator-group?
-  private infix-operator-group ::= (COLON precedence-group-name)
 
   // RULES: PRECEDENCE GROUP DECLARATION
   private precedence-group-attributes ::= precedence-group-attribute (precedence-group-attribute)*
@@ -511,25 +563,21 @@
   private precedence-group-names ::= precedence-group-name (COMMA precedence-group-name)*
   private precedence-group-name ::= IDENTIFIER
 
-  // RULES: DECLARATION MODIFIERS
-  private declaration-modifier ::= KW_CLASS | KW_CONVENIENCE | KW_DYNAMIC | KW_FINAL | KW_INFIX | KW_LAZY | KW_OPTIONAL | KW_OVERRIDE | KW_POSTFIX | KW_PREFIX | KW_REQUIRED | KW_STATIC | KW_UNOWNED (LPAREN (KW_SAFE | KW_UNSAFE) RPAREN)? | KW_WEAK | access-level-modifier | mutation-modifier | KW_NONISOLATED
-  private access-level-modifier ::= KW_PRIVATE (LPAREN KW_SET RPAREN)? | KW_FILEPRIVATE (LPAREN KW_SET RPAREN)? | KW_INTERNAL (LPAREN KW_SET RPAREN)? | KW_PACKAGE (LPAREN KW_SET RPAREN)? | KW_PUBLIC (LPAREN KW_SET RPAREN)? | KW_OPEN (LPAREN KW_SET RPAREN)?
-  private mutation-modifier ::= KW_MUTATING | KW_NONMUTATING
-
-  // RULES: ATTRIBUTES
-  private attribute-argument-clause ::= (LPAREN balanced-tokens? RPAREN)
-  private attributes ::= attribute (attribute)*
-
   // RULES: BALANCED TOKENS
   private balanced-tokens ::= balanced-token (balanced-token)*
   private balanced-token ::= base-balanced-token | ((LPAREN | LBRACKET | LBRACE) base-balanced-token? (RPAREN | RBRACKET | RBRACE))
   private base-balanced-token ::= IDENTIFIER | any-keyword | literal | OPERATOR | balanced-token-punctuation
 
+
   // RULES: PATTERNS
   pattern ::= base-pattern type-casting-suffix?
-  | type-checking-pattern
+  | type-checking-pattern {
+    methods [
+      collectNames()
+    ]
+  }
   private base-pattern ::=
-  ((wildcard-pattern | identifier-pattern| tuple-pattern) type-annotation?)
+  ((wildcard-pattern | identifier-pattern | tuple-pattern) type-annotation?)
     | value-binding-pattern
     | enum-case-pattern
     | optional-pattern
@@ -537,11 +585,22 @@
   private type-casting-suffix ::= (OP_TYPE_CAST type)
   private type-checking-pattern ::= (OP_TYPE_CHECK type)
   private wildcard-pattern ::= KW_UNDERSCORE
-  private identifier-pattern ::= IDENTIFIER
+  private identifier-pattern ::= IDENTIFIER {
+    methods [
+      getName()
+      setName()
+    ]
+  }
   private value-binding-pattern ::= (KW_VAR | KW_LET) pattern
   private tuple-pattern ::= (LPAREN tuple-pattern-element-list? RPAREN)
   private tuple-pattern-element-list ::= tuple-pattern-element (COMMA tuple-pattern-element)*
-  private tuple-pattern-element ::= pattern | IDENTIFIER COLON pattern
+  private tuple-pattern-element ::= pattern | named-tuple-pattern-element
+  named-tuple-pattern-element ::= IDENTIFIER COLON pattern {
+    methods [
+      getName()
+      setName()
+    ]
+  }
   private enum-case-pattern ::= type-identifier? DOT enum-case-name tuple-pattern?
   private optional-pattern ::= identifier-pattern OP_QUESTION
   private expression-pattern ::= expression
