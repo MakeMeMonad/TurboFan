@@ -662,6 +662,7 @@ Underscore = "_"
 // ADDITIONAL STATES BELOW
 //
 
+
 	// RULES: FOR STRING LITERAL STATE
 <STRING> {
 		// RULE: STRING INTERPOLATION START
@@ -708,7 +709,7 @@ Underscore = "_"
 	{EscapedCharacter} {return MULTILINE_STRING_ESCAPED_SEQUENCE;}
 
 		// RULE: MULTILINE STRING CONTENT
-	(.|\n)+ {return STRING_TEXT;}
+	(.|\n)+ {return MULTILINE_STRING_TEXT;}
 		// Fallback:
 	. {return BAD_CHARACTER;}
 }
@@ -752,10 +753,8 @@ Underscore = "_"
 				else {}}else {}}
         return STRING_TEXT;
     }
-
 		// RULE: PROHIBITED NEWLINES
 	[\r\n] {return BAD_CHARACTER;}
-
 		// RULE: EXTENDED STRING CONTENT
 	[^\r\n]+ {return STRING_TEXT;}
 		// Fallback (shouldn't be reached, but good practice soooo ya' know)
@@ -773,7 +772,7 @@ Underscore = "_"
 			stateStack.push(STRING_INTERPOLATION_MARKER);
 			yybegin(INITIAL);
 			return STRING_INTERPOLATION_START;}
-		else {return STRING_TEXT;}
+		else {return MULTILINE_STRING_TEXT;}
 	}
 
     // RULE: CLOSING DELIMITER
@@ -783,7 +782,7 @@ Underscore = "_"
             if (!stateStack.isEmpty()) { yybegin(stateStack.pop());}
 		    else {yybegin(INITIAL);}
             return EXTENDED_MULTILINE_STRING_END;}
-		else {return STRING_TEXT;}
+		else {return MULTILINE_STRING_TEXT;}
     }
 
     // RULE: ESCAPED DELIMITER or LITERAL BACKSLASH
@@ -804,13 +803,11 @@ Underscore = "_"
 				else {}} else {}}
 		return STRING_TEXT;
     }
-
     // RULE: NESTED MULTILINE COMMENT START
 	"/*" {stateStack.push(yystate());yybegin(MULTILINE_COMMENT);
 		  return MULTILINE_COMMENT_START;}
-
 		// RULE: EXTENDED MULTILINE STRING CONTENT
-	(.|\n)+ {return STRING_TEXT;}
+	(.|\n)+ {return MULTILINE_STRING_TEXT;}
 		// Fallback (shouldn't be reached, ideally)
 	. {return BAD_CHARACTER;}
 }
@@ -830,10 +827,10 @@ Underscore = "_"
 	"*/" {yybegin(stateStack.pop());return SwiftTypes.MULTILINE_COMMENT_END;}
 
 		// RULES: MULTILINE COMMENT CONTENT & Fallbacks
-	[^*\n/]+ {return COMMENT_TEXT;}
-	"*" {return COMMENT_TEXT;}
-	"/" {return COMMENT_TEXT;}
-	.|\n {return COMMENT_TEXT;}
+	[^*\n/]+ {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_COMMENT_TEXT;}
+	"*" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_COMMENT_TEXT;}
+	"/" {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_COMMENT_TEXT;}
+	.|\n {return com.makememonad.turbofan.language.swift.psi.SwiftTypes.MULTILINE_COMMENT_TEXT;}
 	. {return BAD_CHARACTER;}
 }
 // END FILE Swift.flex

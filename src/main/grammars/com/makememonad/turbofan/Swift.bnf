@@ -202,7 +202,8 @@
     PsiElement getNameIdentifier()
     PsiReference getReference()
     ItemPresentation getPresentation()
-    PsiElement getDocumentationTarget()    ]
+    PsiElement getDocumentationTarget()
+    ]
   }
   import-kind ::= KW_TYPEALIAS | KW_STRUCT | KW_CLASS | KW_ENUM | KW_LOWER_PROTOCOL_DECL | KW_LET | KW_VAR | KW_FUNC
   import-path ::= IDENTIFIER (DOT IDENTIFIER)?
@@ -216,7 +217,8 @@
     methods [
     PsiReference getReference()
     ItemPresentation getPresentation()
-    PsiElement getDocumentationTarget()    ]
+    PsiElement getDocumentationTarget()
+    ]
   }
   private initializer-head ::= (attributes? declaration-modifiers? (KW_INIT (OP_QUESTION | OP_NOT)? ))
 
@@ -348,14 +350,16 @@
   string-literal ::= static-string-literal | interpolated-string-literal
   //string-literal-opening-delimiter → extended-string-literal-delimiter? "
   //string-literal-closing-delimiter → " extended-string-literal-delimiter?
-  private static-string-literal ::= (STRING_START STRING_TEXT* STRING_END) | (MULTILINE_STRING_START MULTILINE_STRING_TEXT* MULTILINE_STRING_END)
+  static-string-literal ::= singleline-string | multiline-string
+  singleline-string ::= (STRING_START STRING_TEXT* STRING_END)
+  multiline-string ::= (MULTILINE_STRING_START MULTILINE_STRING_TEXT* MULTILINE_STRING_END)
   //multiline-string-literal-opening-delimiter → extended-string-literal-delimiter? """
   //multiline-string-literal-closing-delimiter → """ extended-string-literal-delimiter?
   //extended-string-literal-delimiter → # extended-string-literal-delimiter?
-  interpolated-string-literal ::= (STRING_START interpolated-text? STRING_END) | (MULTILINE_STRING_START multiline-interpolated-text? MULTILINE_STRING_END)
-  private interpolated-text ::= interpolated-text-item interpolated-text*
+  private interpolated-string-literal ::= (STRING_START interpolated-text? STRING_END) | (MULTILINE_STRING_START multiline-interpolated-text? MULTILINE_STRING_END)
+  private interpolated-text ::= interpolated-text-item interpolated-text-item*
   private interpolated-text-item ::= (STRING_INTERPOLATION_START expression STRING_INTERPOLATION_END) | STRING_TEXT
-  private multiline-interpolated-text ::= multiline-interpolated-text-item multiline-interpolated-text?
+  private multiline-interpolated-text ::= multiline-interpolated-text-item multiline-interpolated-text*
   private multiline-interpolated-text-item ::= (STRING_INTERPOLATION_START expression STRING_INTERPOLATION_END) | MULTILINE_STRING_TEXT
 
   // RULES: REGEX LITERALS
@@ -585,17 +589,22 @@
   private type-casting-suffix ::= (OP_TYPE_CAST type)
   private type-checking-pattern ::= (OP_TYPE_CHECK type)
   private wildcard-pattern ::= KW_UNDERSCORE
-  private identifier-pattern ::= IDENTIFIER {
+  identifier-pattern ::= IDENTIFIER {
     methods [
       getName()
+      getNameIdentifier()
       setName()
     ]
   }
   private value-binding-pattern ::= (KW_VAR | KW_LET) pattern
   private tuple-pattern ::= (LPAREN tuple-pattern-element-list? RPAREN)
   private tuple-pattern-element-list ::= tuple-pattern-element (COMMA tuple-pattern-element)*
-  private tuple-pattern-element ::= pattern | named-tuple-pattern-element
-  named-tuple-pattern-element ::= IDENTIFIER COLON pattern {
+  tuple-pattern-element ::= pattern | tuple-pattern-element-name {
+    methods[
+    getNameIdentifier()
+    ]
+  }
+  tuple-pattern-element-name ::= IDENTIFIER COLON pattern {
     methods [
       getName()
       setName()
@@ -619,7 +628,7 @@
   private generic-argument ::= type
 
   // RULES:
-private any-keyword ::=
+  private any-keyword ::=
   KW_PND_AVAILABLE
   | KW_PND_COLORLITERAL
   | KW_PND_ELSE
@@ -801,15 +810,18 @@ private any-keyword ::=
   // LEXICAL TOKEN DEFINITIONS:
 
   // GENERAL/SHARED ACROSS STATES
-  token COMMENT_TEXT
-  token SINGLELINE_COMMENT
   token QUOTED_IDENTIFIER
 
   token STRING_INTERPOLATION_START
+  token STRING_INTERPOLATION_END
+
+  token SINGLELINE_STRING
   token STRING_TEXT
   token STRING_START
   token STRING_END
   token STRING_ESCAPED_SEQUENCE
+  token MULTILINE_STRING
+  token MULTILINE_STRING_TEXT
   token MULTILINE_STRING_START
   token MULTILINE_STRING_END
   token MULTILINE_STRING_ESCAPED_NEWLINE
@@ -818,11 +830,15 @@ private any-keyword ::=
   token EXTENDED_STRING_END
   token EXTENDED_MULTILINE_STRING_START
   token EXTENDED_MULTILINE_STRING_END
+  token SINGLELINE_COMMENT
+  token COMMENT_TEXT
+  token MULTILINE_COMMENT
+  token MULTILINE_COMMENT_TEXT
   token MULTILINE_COMMENT_START
   token MULTILINE_COMMENT_END
+  token REGEXP_LITERAL
   token REGEXP_LITERAL_START
   token REGEXP_LITERAL_END
-  token REGEXP_LITERAL
   token REGEXP
 
   // KEYWORDS (Pound Sign #)

@@ -39,7 +39,13 @@ object SwiftPsiImplUtil {
 
     @JvmStatic
     fun getName(element: SwiftStructDeclaration) = getNameText(element, SwiftStructName::class.java)
-
+    @JvmStatic
+    fun getName(element: SwiftTuplePatternElement): String? {
+        val innerElement = element.firstChild
+        if (innerElement is SwiftTuplePatternElementName) {return getNameText(innerElement, SwiftTuplePatternElementName::class.java)}
+        // case where the innerElement is pattern instead of TuplePatternElementName
+        else {return null}
+    }
     @JvmStatic
     fun getName(element: SwiftTypealiasDeclaration) = getNameText(element, SwiftTypealiasName::class.java)
     @JvmStatic
@@ -85,9 +91,21 @@ object SwiftPsiImplUtil {
         }
     }
     @JvmStatic
+    fun setName(element: SwiftIdentifierPattern, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftIdentifierPattern::class.java) { n ->
+            SwiftElementFactory.createIdentifierPatternName(element.project, n)
+        }
+    }
+    @JvmStatic
     fun setName(element: SwiftMacroDeclaration, newName: String): PsiElement {
         return setNameNode(element, newName, nodeClass = SwiftMacroName::class.java) { n ->
             SwiftElementFactory.createMacroName(element.project, n)
+        }
+    }
+    @JvmStatic
+    fun setName(element: SwiftTuplePatternElement, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftTuplePatternElementName::class.java) { n ->
+            SwiftElementFactory.createTuplePatternElementName(element.project, n)
         }
     }
     @JvmStatic
@@ -138,6 +156,8 @@ object SwiftPsiImplUtil {
     @JvmStatic
     fun getNameIdentifier(element: SwiftFunctionDeclaration) = getNameToken(element, SwiftFunctionName::class.java)
     @JvmStatic
+    fun getNameIdentifier(element: SwiftIdentifierPattern) = getNameToken(element, SwiftIdentifierPattern::class.java)
+    @JvmStatic
     fun getNameIdentifier(element: SwiftMacroDeclaration) = getNameToken(element, SwiftMacroName::class.java)
     @JvmStatic
     fun getNameIdentifier(element: SwiftPrecedenceGroupDeclaration) = getNameToken(element, SwiftPrecedenceGroupName::class.java)
@@ -145,6 +165,8 @@ object SwiftPsiImplUtil {
     fun getNameIdentifier(element: SwiftProtocolDeclaration) = getNameToken(element, SwiftProtocolName::class.java)
     @JvmStatic
     fun getNameIdentifier(element: SwiftStructDeclaration) = getNameToken(element, SwiftStructName::class.java)
+    @JvmStatic
+    fun getNameIdentifier(element: SwiftTuplePatternElement) = getNameToken(element, SwiftTuplePatternElementName::class.java)
     @JvmStatic
     fun getNameIdentifier(element: SwiftTypealiasDeclaration) = getNameToken(element, SwiftTypealiasName::class.java)
     @JvmStatic
@@ -186,7 +208,7 @@ object SwiftPsiImplUtil {
 
     @JvmStatic
     fun getName(element: SwiftIdentifierPattern): String? {return element.firstChild?.text}
-    fun getName(element: SwiftNamedTuplePatternElement): String? {return element.firstChild?.text}
+
 
     // PRECEDENCE GROUP DECL CUSTOM LOGIC
     // PROTOCOL DECL CUSTOM LOGIC

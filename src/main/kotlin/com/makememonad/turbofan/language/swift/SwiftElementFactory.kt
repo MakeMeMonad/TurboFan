@@ -42,6 +42,13 @@ object SwiftElementFactory {
         val funcName: PsiElement? = funcDecl.getNameIdentifier
         return funcName
     }
+    fun createIdentifierPatternName(project: Project, name: String): PsiElement? {
+        val dummyCode = " $name "
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val identifierPattern = (file.firstChild as? SwiftIdentifierPattern) ?: return null
+        val identPatternName: PsiElement? = identifierPattern.getNameIdentifier
+        return identPatternName
+    }
     fun createMacroName(project: Project, name: String): PsiElement? {
         val dummyCode = "#macro $name {}"
         val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
@@ -69,6 +76,13 @@ object SwiftElementFactory {
         val structDecl = (file.firstChild as? SwiftStructDeclaration) ?: return null
         val structName: PsiElement? = structDecl.getNameIdentifier
         return structName
+    }
+    fun createTuplePatternElementName(project: Project, name: String): PsiElement? {
+        val dummyCode = "($name: Int)"
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val tuplePatternElement = (file.firstChild as? SwiftTuplePatternElement) ?: return null
+        val tuplePatternElementName: PsiElement? = tuplePatternElement.getNameIdentifier
+        return tuplePatternElementName
     }
     fun createTypealiasName(project: Project, name: String): PsiElement? {
         val dummyCode = "typealias $name = Int"
