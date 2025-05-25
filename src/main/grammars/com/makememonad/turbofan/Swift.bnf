@@ -480,7 +480,15 @@
   private closure-parameter-name ::= IDENTIFIER
   private capture-list ::= (LBRACKET capture-list-items RBRACKET)
   private capture-list-items ::= capture-list-item (COMMA capture-list-item)*
-  private capture-list-item ::= capture-specifier? IDENTIFIER | capture-specifier? IDENTIFIER OP_ASSIGNMENT expression | capture-specifier? self-expression
+  capture-list-item ::=
+  capture-specifier? capture-list-item-name | capture-specifier? capture-list-item-name OP_ASSIGNMENT expression | capture-specifier? self-expression {
+    methods [
+      String getName()
+      PsiElement getNameIdentifier
+      PsiElement setName(String name)
+    ]
+  }
+  capture-list-item-name ::= IDENTIFIER
   private capture-specifier ::= KW_WEAK | KW_UNOWNED | KW_UNOWNED LPAREN KW_SAFE RPAREN | KW_UNOWNED LPAREN KW_UNSAFE RPAREN
   private implicit-member-expression ::= DOT IDENTIFIER | DOT IDENTIFIER DOT postfix-expression
   private parenthesized-expression ::= (LPAREN expression RPAREN)
@@ -488,11 +496,11 @@
   private tuple-element-list ::= tuple-element (COMMA tuple-element)*
   private tuple-element ::= expression | (IDENTIFIER COLON expression)
   private wildcard-expression ::= OP_UNDERSCORE
-  macro-expansion-expression ::= POUND IDENTIFIER generic-argument-clause? function-call-argument-clause? trailing-closures? {
-    methods [
-      String getName()
-    ]
+  macro-expansion-expression ::=
+  POUND macro-expansion-expression-name generic-argument-clause? function-call-argument-clause? trailing-closures? {
+    methods [String getName()]
   }
+  macro-expansion-expression-name ::= IDENTIFIER
   private key-path-expression ::= (BACKSLASH type? DOT key-path-components)
   private key-path-components ::= key-path-component (DOT key-path-component)*
   private key-path-component ::= IDENTIFIER key-path-postfixes? | key-path-postfixes

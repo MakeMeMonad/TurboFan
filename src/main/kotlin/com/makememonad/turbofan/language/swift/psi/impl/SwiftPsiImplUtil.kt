@@ -62,6 +62,8 @@ object SwiftPsiImplUtil {
     }
     @JvmStatic
     fun getName(element: SwiftMacroDeclaration) = getNameText(element, SwiftMacroName::class.java)
+    @JvmStatic
+    fun getName(element: SwiftMacroExpansionExpression) = getNameText(element, SwiftMacroExpansionExpressionName::class.java)
 
     @JvmStatic
     fun getName(element: SwiftPrecedenceGroupDeclaration) = getNameText(element, SwiftPrecedenceGroupName::class.java)
