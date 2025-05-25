@@ -470,7 +470,14 @@
   private closure-signature ::= capture-list? closure-parameter-clause async? throws-clause? function-result? KW_IN | capture-list KW_IN
   private closure-parameter-clause ::= LPAREN (closure-parameter-list)? RPAREN | identifier-list
   private closure-parameter-list ::= closure-parameter (COMMA closure-parameter)*
-  private closure-parameter ::= IDENTIFIER type-annotation? | IDENTIFIER type-annotation ELLIPSIS
+  closure-parameter ::= closure-parameter-name type-annotation? | closure-parameter-name type-annotation ELLIPSIS {
+    methods [
+      String getName()
+      PsiElement getNameIdentifier
+      PsiElement setName(String name)
+    ]
+  }
+  private closure-parameter-name ::= IDENTIFIER
   private capture-list ::= (LBRACKET capture-list-items RBRACKET)
   private capture-list-items ::= capture-list-item (COMMA capture-list-item)*
   private capture-list-item ::= capture-specifier? IDENTIFIER | capture-specifier? IDENTIFIER OP_ASSIGNMENT expression | capture-specifier? self-expression
@@ -483,7 +490,7 @@
   private wildcard-expression ::= OP_UNDERSCORE
   macro-expansion-expression ::= POUND IDENTIFIER generic-argument-clause? function-call-argument-clause? trailing-closures? {
     methods [
-      getName()
+      String getName()
     ]
   }
   private key-path-expression ::= (BACKSLASH type? DOT key-path-components)
@@ -503,7 +510,7 @@
   private initializer-expression ::= (DOT KW_INIT) (LPAREN argument-names RPAREN)?
   private explicit-member-expression ::= (DOT DECIMAL_LITERAL | DOT IDENTIFIER (LPAREN argument-names RPAREN | generic-argument-clause?) | conditional-compilation-block)
   private argument-names ::= argument-name (argument-name)*
-  argument-name ::= (IDENTIFIER COLON)
+  private argument-name ::= (IDENTIFIER COLON)
   private postfix-self-expression ::= (DOT KW_LOWER_SELF)
   private subscript-expression ::= (LBRACKET function-call-argument-list RBRACKET)
   private forced-value-expression ::= (OP_NOT)
