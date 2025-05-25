@@ -1,8 +1,7 @@
 package com.makememonad.turbofan.language.swift.psi.impl
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.PsiTreeUtil.findChildOfType
-import com.intellij.psi.util.PsiTreeUtil.findChildrenOfAnyType
+import com.intellij.psi.util.PsiTreeUtil.*
 import com.makememonad.turbofan.language.swift.SwiftElementFactory
 import com.makememonad.turbofan.language.swift.psi.*
 
@@ -12,9 +11,28 @@ object SwiftPsiImplUtil {
         val nameElement = findChildOfType(element, nodeClass)
         return nameElement?.node?.firstChildNode?.text
     }
-
+    private fun getQualifiedNameTextFromSeparatedList(element: PsiElement, parentNodeClass: Class<out PsiElement>, childNodeClass: Class<out PsiElement>, separator: String): String? {
+        val nameElementsHolder = findChildOfType(element, parentNodeClass) ?: return null
+        val nameElementsList = findChildrenOfType(nameElementsHolder, childNodeClass)
+        return nameElementsList
+            .mapNotNull {
+                val t = it.node.firstChildNode?.text
+                t?.takeIf { s -> s.isNotBlank() && s != "_" && s != separator}
+            }
+            .joinToString(separator)
+    }
+    private fun getQualifiedNameTextFromChildNodes(element: PsiElement, parentNodeClass: Class<out PsiElement>, childNodeClass: Class<out PsiElement>): String? {
+        val nameElementsParentNode = findChildOfType(element, parentNodeClass) ?: return null
+        val nameElementsList = findChildrenOfAnyType(nameElementsParentNode, childNodeClass)
+        return nameElementsList
+            .mapNotNull{
+                val t = it.firstChild?.text
+                t?.takeIf { s -> s.isNotBlank() && s != "_" }
+            }
+            .joinToString(".")
+    }
     @JvmStatic
-    fun getName(element: SwiftAttribute) = getNameText(element, SwiftAttributeName::class.java)
+    fun getName(element: SwiftAttribute): String? = getNameText(element, SwiftAttributeName::class.java)
 
     @JvmStatic
     fun getName(element: SwiftActorDeclaration) = getNameText(element, SwiftActorName::class.java)
@@ -24,10 +42,24 @@ object SwiftPsiImplUtil {
 
     @JvmStatic
     fun getName(element: SwiftEnumDeclaration) = getNameText(element, SwiftEnumName::class.java)
-
     @JvmStatic
-    fun getName(element: SwiftFunctionDeclaration) = getNameText(element, SwiftFunctionName::class.java)
-
+    fun getName(element: SwiftExtensionDeclaration): String? = getQualifiedNameTextFromChildNodes(
+        element, SwiftTypeIdentifier::class.java, SwiftTypeName::class.java
+    )
+    @JvmStatic
+    fun getName(element: SwiftUnionStyleEnumCase) = getNameText(element, SwiftEnumCaseName::class.java)
+    @JvmStatic
+    fun getName(element: SwiftRawValueStyleEnumCase) = getNameText(element, SwiftEnumCaseName::class.java)
+    @JvmStatic
+    fun getName(element: SwiftFunctionDeclaration): String? = getNameText(element, SwiftFunctionName::class.java)
+    @JvmStatic
+    fun getName(element: SwiftIdentifierPattern): String? = element.firstChild?.text
+    @JvmStatic
+    fun getName(element: SwiftImportDeclaration): String? {
+        return getQualifiedNameTextFromSeparatedList(
+            element, SwiftImportPath::class.java, SwiftImportName::class.java, "."
+        )
+    }
     @JvmStatic
     fun getName(element: SwiftMacroDeclaration) = getNameText(element, SwiftMacroName::class.java)
 
@@ -36,9 +68,12 @@ object SwiftPsiImplUtil {
 
     @JvmStatic
     fun getName(element: SwiftProtocolDeclaration) = getNameText(element, SwiftProtocolName::class.java)
-
     @JvmStatic
-    fun getName(element: SwiftStructDeclaration) = getNameText(element, SwiftStructName::class.java)
+    fun getName(element: SwiftProtocolAssociatedTypeDeclaration) = getNameText(element, SwiftTypealiasName::class.java)
+    @JvmStatic
+    fun getName(element: SwiftProtocolVariableDeclaration) = getNameText(element, SwiftVariableName::class.java)
+    @JvmStatic
+    fun getName(element: SwiftStructDeclaration): String? = getNameText(element, SwiftStructName::class.java)
     @JvmStatic
     fun getName(element: SwiftTuplePatternElement): String? {
         val innerElement = element.firstChild
@@ -47,9 +82,9 @@ object SwiftPsiImplUtil {
         else {return null}
     }
     @JvmStatic
-    fun getName(element: SwiftTypealiasDeclaration) = getNameText(element, SwiftTypealiasName::class.java)
+    fun getName(element: SwiftTypealiasDeclaration): String? = getNameText(element, SwiftTypealiasName::class.java)
     @JvmStatic
-    fun getName(element: SwiftVariableDeclaration) = getNameText(element, SwiftVariableName::class.java)
+    fun getName(element: SwiftVariableDeclaration): String? = getNameText(element, SwiftVariableName::class.java)
 
 
     // setName(element: T, newName: String): PsiElement overloads
@@ -82,6 +117,18 @@ object SwiftPsiImplUtil {
     fun setName(element: SwiftEnumDeclaration, newName: String): PsiElement {
         return setNameNode(element, newName, nodeClass = SwiftEnumName::class.java) { n ->
             SwiftElementFactory.createEnumName(element.project, n)
+        }
+    }
+    @JvmStatic
+    fun setName(element: SwiftUnionStyleEnumCase, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftEnumCaseName::class.java) { n ->
+            SwiftElementFactory.createUnionStyleEnumCaseName(element.project, n)
+        }
+    }
+    @JvmStatic
+    fun setName(element: SwiftRawValueStyleEnumCase, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftEnumCaseName::class.java) { n ->
+            SwiftElementFactory.createRawValueStyleEnumCaseName(element.project, n)
         }
     }
     @JvmStatic
@@ -121,6 +168,18 @@ object SwiftPsiImplUtil {
         }
     }
     @JvmStatic
+    fun setName(element: SwiftProtocolAssociatedTypeDeclaration, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftTypealiasName::class.java) { n ->
+            SwiftElementFactory.createProtocolAssociatedTypeName(element.project, n)
+        }
+    }
+    @JvmStatic
+    fun setName(element: SwiftProtocolVariableDeclaration, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftVariableName::class.java) { n ->
+            SwiftElementFactory.createProtocolVariableName(element.project, n)
+        }
+    }
+    @JvmStatic
     fun setName(element: SwiftStructDeclaration, newName: String): PsiElement {
         return setNameNode(element, newName, nodeClass = SwiftStructName::class.java) { n ->
             SwiftElementFactory.createStructName(element.project, n)
@@ -144,6 +203,11 @@ object SwiftPsiImplUtil {
         val nameElement = findChildOfType(element, nodeClass)
         return nameElement?.firstChild
     }
+    private fun getLastNameToken(element: PsiElement, parentListClass: Class<out PsiElement>, childListItemClass: Class<out PsiElement>): PsiElement? {
+        val nameElementsParentNode = findChildOfType(element, parentListClass) ?: return null
+        val nameElementsList = findChildrenOfAnyType(nameElementsParentNode, childListItemClass)
+        return nameElementsList.lastOrNull()?.firstChild
+    }
 
     @JvmStatic
     fun getNameIdentifier(element: SwiftAttribute) = getNameToken(element, SwiftAttributeName::class.java)
@@ -154,15 +218,29 @@ object SwiftPsiImplUtil {
     @JvmStatic
     fun getNameIdentifier(element: SwiftEnumDeclaration) = getNameToken(element, SwiftEnumName::class.java)
     @JvmStatic
+    fun getNameIdentifier (element: SwiftExtensionDeclaration) = getLastNameToken(
+        element, SwiftTypeIdentifier::class.java, SwiftTypeName::class.java
+    )
+    @JvmStatic
+    fun getNameIdentifier(element: SwiftUnionStyleEnumCase) = getNameToken(element, SwiftEnumCaseName::class.java)
+    @JvmStatic
+    fun getNameIdentifier(element: SwiftRawValueStyleEnumCase) = getNameToken(element, SwiftEnumCaseName::class.java)
+    @JvmStatic
     fun getNameIdentifier(element: SwiftFunctionDeclaration) = getNameToken(element, SwiftFunctionName::class.java)
     @JvmStatic
     fun getNameIdentifier(element: SwiftIdentifierPattern) = getNameToken(element, SwiftIdentifierPattern::class.java)
+    @JvmStatic
+    fun getNameIdentifier(element: SwiftImportDeclaration) = getLastNameToken(element, SwiftImportPath::class.java, SwiftImportName::class.java)
     @JvmStatic
     fun getNameIdentifier(element: SwiftMacroDeclaration) = getNameToken(element, SwiftMacroName::class.java)
     @JvmStatic
     fun getNameIdentifier(element: SwiftPrecedenceGroupDeclaration) = getNameToken(element, SwiftPrecedenceGroupName::class.java)
     @JvmStatic
     fun getNameIdentifier(element: SwiftProtocolDeclaration) = getNameToken(element, SwiftProtocolName::class.java)
+    @JvmStatic
+    fun getNameIdentifier(element: SwiftProtocolAssociatedTypeDeclaration) = getNameToken(element, SwiftTypealiasName::class.java)
+    @JvmStatic
+    fun getNameIdentifier(element: SwiftProtocolVariableDeclaration) = getNameToken(element, SwiftVariableName::class.java)
     @JvmStatic
     fun getNameIdentifier(element: SwiftStructDeclaration) = getNameToken(element, SwiftStructName::class.java)
     @JvmStatic
@@ -206,8 +284,7 @@ object SwiftPsiImplUtil {
     // MACRO DECL CUSTOM LOGIC
     // PATTERN/identifier-pattern/named-tuple-pattern-element CUSTOM LOGIC
 
-    @JvmStatic
-    fun getName(element: SwiftIdentifierPattern): String? {return element.firstChild?.text}
+
 
 
     // PRECEDENCE GROUP DECL CUSTOM LOGIC

@@ -142,7 +142,13 @@
   private union-style-enum-member ::= declaration | union-style-enum-case-clause | compiler-control-statement
   private union-style-enum-case-clause ::= attributes? KW_INDIRECT? KW_CASE union-style-enum-case-list
   private union-style-enum-case-list ::= union-style-enum-case (COMMA union-style-enum-case)*
-  private union-style-enum-case ::= enum-case-name tuple-type?
+  union-style-enum-case ::= enum-case-name tuple-type? {
+    methods [
+      String getName()
+      PsiElement getNameIdentifier()
+      PsiElement setName(String name)
+    ]
+  }
   enum-declaration-name ::= IDENTIFIER
   enum-case-name ::= IDENTIFIER
   raw-value-style-enum ::= KW_ENUM enum-declaration-name generic-parameter-clause? type-inheritance-clause generic-where-clause? (LBRACE raw-value-style-enum-members RBRACE)
@@ -150,22 +156,33 @@
   private raw-value-style-enum-member ::= declaration | raw-value-style-enum-case-clause | compiler-control-statement
   private raw-value-style-enum-case-clause ::= attributes? KW_CASE raw-value-style-enum-case-list
   private raw-value-style-enum-case-list ::= raw-value-style-enum-case (COMMA raw-value-style-enum-case)*
-  private raw-value-style-enum-case ::= enum-case-name raw-value-assignment?
+  raw-value-style-enum-case ::= enum-case-name raw-value-assignment? {
+    methods [
+      String getName()
+      PsiElement getNameIdentifier()
+      PsiElement setName(String name)
+    ]
+  }
   private raw-value-assignment ::= (OP_ASSIGNMENT raw-value-literal)
   private raw-value-literal ::= numeric-literal | static-string-literal | boolean-literal
 
     // RULES: EXTENSION DECLARATION
-  extension-declaration ::= attributes? access-level-modifier? KW_EXTENSION type-identifier type-inheritance-clause? generic-where-clause? extension-body {
+  extension-declaration ::=
+  attributes? access-level-modifier? KW_EXTENSION type-identifier type-inheritance-clause? generic-where-clause? extension-body {
     methods [
+    String getName()
+    PsiElement getNameIdentifier()
+    PsiElement setName(String name)
     ItemPresentation getPresentation()
     ]
   }
     private extension-body ::= (LBRACE extension-members? RBRACE)
-    extension-members ::= extension-member (extension-member)*
+    private extension-members ::= extension-member (extension-member)*
     private extension-member ::= declaration | compiler-control-statement
 
     // RULES: FUNCTION DECLARATION
-  function-declaration ::= function-head function-declaration-name generic-parameter-clause? function-signature generic-where-clause?  code-block? {
+  function-declaration ::=
+  function-head function-declaration-name generic-parameter-clause? function-signature generic-where-clause?  code-block? {
     methods [
     String getName()
     PsiElement getNameIdentifier()
@@ -206,7 +223,8 @@
     ]
   }
   import-kind ::= KW_TYPEALIAS | KW_STRUCT | KW_CLASS | KW_ENUM | KW_LOWER_PROTOCOL_DECL | KW_LET | KW_VAR | KW_FUNC
-  import-path ::= IDENTIFIER (DOT IDENTIFIER)?
+  import-path ::= import-name (DOT import-name)*
+  import-name ::= IDENTIFIER
 
   // RULES: INIT AND DEINIT DECLARATION
   deinitializer-declaration ::= (attributes? KW_DEINIT code-block) {
@@ -275,13 +293,26 @@
   private protocol-body ::= (LBRACE protocol-members? RBRACE)
   private protocol-members ::= protocol-member (protocol-member)*
   private protocol-member ::= protocol-member-declaration | compiler-control-statement
-  private protocol-member-declaration ::=
+  protocol-member-declaration ::=
   // protocol-property-declaration |
-  protocol-method-declaration | protocol-initializer-declaration | protocol-subscript-declaration | protocol-associated-type-declaration | typealias-declaration | variable-declaration-head variable-name type-annotation getter-setter-keyword-block
+  protocol-method-declaration | protocol-initializer-declaration | protocol-subscript-declaration | protocol-associated-type-declaration | typealias-declaration | protocol-variable-declaration
   private protocol-method-declaration ::= function-head function-declaration-name generic-parameter-clause? function-signature generic-where-clause?
   private protocol-initializer-declaration ::= initializer-head generic-parameter-clause? parameter-clause throws-clause? generic-where-clause? | initializer-head generic-parameter-clause? parameter-clause KW_RETHROWS generic-where-clause?
   private protocol-subscript-declaration ::= subscript-head subscript-result generic-where-clause? getter-setter-keyword-block
-  private protocol-associated-type-declaration ::= attributes? access-level-modifier? KW_ASSOCIATEDTYPE typealias-name type-inheritance-clause? typealias-assignment? generic-where-clause?
+  protocol-associated-type-declaration ::= attributes? access-level-modifier? KW_ASSOCIATEDTYPE typealias-name type-inheritance-clause? typealias-assignment? generic-where-clause? {
+  methods [
+    String getName()
+    PsiElement getNameIdentifier()
+    PsiElement setName(String name)
+  ]
+ }
+ protocol-variable-declaration ::= variable-declaration-head variable-name type-annotation getter-setter-keyword-block {
+  methods [
+    String getName()
+    PsiElement getNameIdentifier()
+    PsiElement setName(String name)
+  ]
+ }
 
     // RULES: STRUCT DECLARATION
   struct-declaration ::= attributes? access-level-modifier? KW_STRUCT struct-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? struct-body {
@@ -450,7 +481,11 @@
   private tuple-element-list ::= tuple-element (COMMA tuple-element)*
   private tuple-element ::= expression | (IDENTIFIER COLON expression)
   private wildcard-expression ::= OP_UNDERSCORE
-  private macro-expansion-expression ::= POUND IDENTIFIER generic-argument-clause? function-call-argument-clause? trailing-closures?
+  macro-expansion-expression ::= POUND IDENTIFIER generic-argument-clause? function-call-argument-clause? trailing-closures? {
+    methods [
+      getName()
+    ]
+  }
   private key-path-expression ::= (BACKSLASH type? DOT key-path-components)
   private key-path-components ::= key-path-component (DOT key-path-component)*
   private key-path-component ::= IDENTIFIER key-path-postfixes? | key-path-postfixes
@@ -463,12 +498,12 @@
   private function-call-expression ::= (function-call-argument-clause | (function-call-argument-clause? trailing-closures))
   private function-call-argument-clause ::= (LPAREN function-call-argument-list? RPAREN)
   private function-call-argument-list ::= function-call-argument (COMMA function-call-argument)*
-  private function-call-argument ::= (IDENTIFIER COLON )? (expression | OPERATOR)
+  function-call-argument ::= (IDENTIFIER COLON )? (expression | OPERATOR)
   private trailing-closures ::= closure-expression (IDENTIFIER COLON closure-expression)*
   private initializer-expression ::= (DOT KW_INIT) (LPAREN argument-names RPAREN)?
   private explicit-member-expression ::= (DOT DECIMAL_LITERAL | DOT IDENTIFIER (LPAREN argument-names RPAREN | generic-argument-clause?) | conditional-compilation-block)
   private argument-names ::= argument-name (argument-name)*
-  private argument-name ::= (IDENTIFIER COLON)
+  argument-name ::= (IDENTIFIER COLON)
   private postfix-self-expression ::= (DOT KW_LOWER_SELF)
   private subscript-expression ::= (LBRACKET function-call-argument-list RBRACKET)
   private forced-value-expression ::= (OP_NOT)

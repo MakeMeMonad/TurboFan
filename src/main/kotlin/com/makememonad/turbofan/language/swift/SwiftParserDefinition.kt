@@ -22,7 +22,7 @@ class SwiftParserDefinition: ParserDefinition {
 
     override fun getFileNodeType(): IFileElementType = FILE
 
-    override fun getCommentTokens(): TokenSet = SwiftTokenSets.COMMENTS
+    override fun getCommentTokens(): TokenSet = SwiftTokenSets.ALL_COMMENTS
 
     override fun getStringLiteralElements(): TokenSet = SwiftTokenSets.STRINGS
 

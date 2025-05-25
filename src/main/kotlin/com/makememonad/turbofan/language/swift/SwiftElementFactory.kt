@@ -35,6 +35,20 @@ object SwiftElementFactory {
         val enumName: PsiElement? = enumDecl.getNameIdentifier
         return enumName
     }
+    fun createUnionStyleEnumCaseName(project: Project, name: String): PsiElement? {
+        val dummyCode = ""
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val unionStyleEnumCase = (file.firstChild as? SwiftUnionStyleEnumCase) ?: return null
+        val unionStyleEnumCaseName: PsiElement? = unionStyleEnumCase.getNameIdentifier
+        return unionStyleEnumCaseName
+    }
+    fun createRawValueStyleEnumCaseName(project: Project, name: String): PsiElement? {
+        val dummyCode = ""
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val rawValueStyleEnumCase = (file.firstChild as? SwiftRawValueStyleEnumCase) ?: return null
+        val rawValueStyleEnumCaseName: PsiElement? = rawValueStyleEnumCase.getNameIdentifier
+        return rawValueStyleEnumCaseName
+    }
     fun createFunctionName(project: Project, name: String): PsiElement? {
         val dummyCode = "func $name() {}"
         val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
@@ -43,7 +57,7 @@ object SwiftElementFactory {
         return funcName
     }
     fun createIdentifierPatternName(project: Project, name: String): PsiElement? {
-        val dummyCode = " $name "
+        val dummyCode = "$name "
         val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
         val identifierPattern = (file.firstChild as? SwiftIdentifierPattern) ?: return null
         val identPatternName: PsiElement? = identifierPattern.getNameIdentifier
@@ -70,8 +84,22 @@ object SwiftElementFactory {
         val protocolName: PsiElement? = protocolDecl.getNameIdentifier
         return protocolName
     }
+    fun createProtocolAssociatedTypeName(project: Project, name: String): PsiElement? {
+        val dummyCode = "associatedtype $name {}"
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val protocolAssociatedTypeDecl = (file.firstChild as? SwiftProtocolAssociatedTypeDeclaration) ?: return null
+        val protocolAssociatedTypeName: PsiElement? = protocolAssociatedTypeDecl.getNameIdentifier
+        return protocolAssociatedTypeName
+    }
+    fun createProtocolVariableName(project: Project, name: String): PsiElement? {
+        val dummyCode = "var $name: Int {}"
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val protocolVariableDecl = (file.firstChild as? SwiftProtocolVariableDeclaration) ?: return null
+        val protocolVariableName: PsiElement? = protocolVariableDecl.getNameIdentifier
+        return protocolVariableName
+    }
     fun createStructName(project: Project, name: String): PsiElement? {
-        val dummyCode = "Struct $name {}"
+        val dummyCode = "struct $name {}"
         val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
         val structDecl = (file.firstChild as? SwiftStructDeclaration) ?: return null
         val structName: PsiElement? = structDecl.getNameIdentifier
