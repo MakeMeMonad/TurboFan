@@ -36,12 +36,16 @@ object SwiftPsiImplUtil {
 
     @JvmStatic
     fun getName(element: SwiftActorDeclaration) = getNameText(element, SwiftActorName::class.java)
-
+    @JvmStatic
+    fun getName(element: SwiftCaptureListItem) = getNameText(element, SwiftCaptureListItemName::class.java)
     @JvmStatic
     fun getName(element: SwiftClassDeclaration) = getNameText(element, SwiftClassName::class.java)
-
+    @JvmStatic
+    fun getName(element: SwiftClosureParameter) = getNameText(element, SwiftClosureParameterName::class.java)
     @JvmStatic
     fun getName(element: SwiftEnumDeclaration) = getNameText(element, SwiftEnumName::class.java)
+    @JvmStatic
+    fun getName(element: SwiftExternalParameterNameHolder) = getNameText(element, SwiftExternalParameterName::class.java)
     @JvmStatic
     fun getName(element: SwiftExtensionDeclaration): String? = getQualifiedNameTextFromChildNodes(
         element, SwiftTypeIdentifier::class.java, SwiftTypeName::class.java
@@ -53,6 +57,8 @@ object SwiftPsiImplUtil {
     @JvmStatic
     fun getName(element: SwiftFunctionDeclaration): String? = getNameText(element, SwiftFunctionName::class.java)
     @JvmStatic
+    fun getName(element: SwiftGenericParameter): String? = getNameText(element, SwiftGenericParameterTypeName::class.java)
+    @JvmStatic
     fun getName(element: SwiftIdentifierPattern): String? = element.firstChild?.text
     @JvmStatic
     fun getName(element: SwiftImportDeclaration): String? {
@@ -61,10 +67,11 @@ object SwiftPsiImplUtil {
         )
     }
     @JvmStatic
+    fun getName(element: SwiftInternalParameterNameHolder): String? = getNameText(element, SwiftInternalParameterName::class.java)
+    @JvmStatic
     fun getName(element: SwiftMacroDeclaration) = getNameText(element, SwiftMacroName::class.java)
     @JvmStatic
     fun getName(element: SwiftMacroExpansionExpression) = getNameText(element, SwiftMacroExpansionExpressionName::class.java)
-
     @JvmStatic
     fun getName(element: SwiftPrecedenceGroupDeclaration) = getNameText(element, SwiftPrecedenceGroupName::class.java)
 
@@ -110,10 +117,22 @@ object SwiftPsiImplUtil {
         }
     }
     @JvmStatic
+    fun setName(element: SwiftCaptureListItem, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftCaptureListItemName::class.java) { n ->
+            SwiftElementFactory.createCaptureListItemName(element.project, n)
+        }
+    }
+    @JvmStatic
     fun setName(element: SwiftClassDeclaration, newName: String): PsiElement {
         return setNameNode(element, newName, nodeClass = SwiftClassName::class.java) { n ->
             SwiftElementFactory.createClassName(element.project, n)
             }
+    }
+    @JvmStatic
+    fun setName(element: SwiftClosureParameter, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftClosureParameterName::class.java) { n ->
+            SwiftElementFactory.createClosureParameterName(element.project, n)
+        }
     }
     @JvmStatic
     fun setName(element: SwiftEnumDeclaration, newName: String): PsiElement {
@@ -134,15 +153,33 @@ object SwiftPsiImplUtil {
         }
     }
     @JvmStatic
+    fun setName(element: SwiftExternalParameterNameHolder, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftExternalParameterName::class.java) { n ->
+            SwiftElementFactory.createExternalParameterName(element.project, n)
+        }
+    }
+    @JvmStatic
     fun setName(element: SwiftFunctionDeclaration, newName: String): PsiElement {
         return setNameNode(element, newName, nodeClass = SwiftFunctionName::class.java) { n ->
             SwiftElementFactory.createFunctionName(element.project, n)
         }
     }
     @JvmStatic
+    fun setName(element: SwiftGenericParameter, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftGenericParameterTypeName::class.java) { n ->
+            SwiftElementFactory.createGenericParameterTypeName(element.project, n)
+        }
+    }
+    @JvmStatic
     fun setName(element: SwiftIdentifierPattern, newName: String): PsiElement {
         return setNameNode(element, newName, nodeClass = SwiftIdentifierPattern::class.java) { n ->
             SwiftElementFactory.createIdentifierPatternName(element.project, n)
+        }
+    }
+    @JvmStatic
+    fun setName(element: SwiftInternalParameterNameHolder, newName: String): PsiElement {
+        return setNameNode(element, newName, nodeClass = SwiftInternalParameterName::class.java) { n ->
+            SwiftElementFactory.createInternalParameterName(element.project, n)
         }
     }
     @JvmStatic
@@ -212,41 +249,75 @@ object SwiftPsiImplUtil {
     }
 
     @JvmStatic
-    fun getNameIdentifier(element: SwiftAttribute) = getNameToken(element, SwiftAttributeName::class.java)
+    fun getNameIdentifier(element: SwiftAttribute): PsiElement? = getNameToken(element, SwiftAttributeName::class.java)
     @JvmStatic
-    fun getNameIdentifier(element: SwiftActorDeclaration) = getNameToken(element, SwiftActorName::class.java)
+    fun getNameIdentifier(element: SwiftActorDeclaration): PsiElement? = getNameToken(element, SwiftActorName::class.java)
+    @JvmStatic
+    fun getNameIdentifier(element: SwiftCaptureListItem) = getNameToken(element, SwiftCaptureListItemName::class.java)
     @JvmStatic
     fun getNameIdentifier(element: SwiftClassDeclaration) = getNameToken(element, SwiftClassName::class.java)
     @JvmStatic
+    fun getNameIdentifier(element: SwiftClosureParameter) = getNameToken(element, SwiftClosureParameterName::class.java)
+    @JvmStatic
     fun getNameIdentifier(element: SwiftEnumDeclaration) = getNameToken(element, SwiftEnumName::class.java)
     @JvmStatic
-    fun getNameIdentifier (element: SwiftExtensionDeclaration) = getLastNameToken(
-        element, SwiftTypeIdentifier::class.java, SwiftTypeName::class.java
-    )
+    fun getNameIdentifier(element: SwiftExternalParameterNameHolder): PsiElement? {
+	    return getNameToken(element, SwiftExternalParameterName::class.java)
+    }
     @JvmStatic
-    fun getNameIdentifier(element: SwiftUnionStyleEnumCase) = getNameToken(element, SwiftEnumCaseName::class.java)
+    fun getNameIdentifier (element: SwiftExtensionDeclaration): PsiElement? {
+	    return getLastNameToken(
+		    element, SwiftTypeIdentifier::class.java, SwiftTypeName::class.java
+	    )
+    }
     @JvmStatic
-    fun getNameIdentifier(element: SwiftRawValueStyleEnumCase) = getNameToken(element, SwiftEnumCaseName::class.java)
+    fun getNameIdentifier(element: SwiftUnionStyleEnumCase): PsiElement? {
+	    return getNameToken(element, SwiftEnumCaseName::class.java)
+    }
     @JvmStatic
-    fun getNameIdentifier(element: SwiftFunctionDeclaration) = getNameToken(element, SwiftFunctionName::class.java)
+    fun getNameIdentifier(element: SwiftRawValueStyleEnumCase): PsiElement? {
+	    return getNameToken(element, SwiftEnumCaseName::class.java)
+    }
+    @JvmStatic
+    fun getNameIdentifier(element: SwiftFunctionDeclaration): PsiElement? {
+	    return this.getNameToken(element, SwiftFunctionName::class.java)
+    }
+    @JvmStatic
+    fun getNameIdentifier(element: SwiftGenericParameter): PsiElement? {
+	    return getNameToken(element, SwiftGenericParameterTypeName::class.java)
+    }
     @JvmStatic
     fun getNameIdentifier(element: SwiftIdentifierPattern) = getNameToken(element, SwiftIdentifierPattern::class.java)
     @JvmStatic
-    fun getNameIdentifier(element: SwiftImportDeclaration) = getLastNameToken(element, SwiftImportPath::class.java, SwiftImportName::class.java)
+    fun getNameIdentifier(element: SwiftImportDeclaration): PsiElement? {
+	    return this.getLastNameToken(
+		    element, SwiftImportPath::class.java, SwiftImportName::class.java
+	    )
+    }
+    @JvmStatic
+    fun getNameIdentifier(element: SwiftInternalParameterNameHolder): PsiElement? {
+	    return getNameToken(element, SwiftInternalParameterName::class.java)
+    }
     @JvmStatic
     fun getNameIdentifier(element: SwiftMacroDeclaration) = getNameToken(element, SwiftMacroName::class.java)
     @JvmStatic
-    fun getNameIdentifier(element: SwiftPrecedenceGroupDeclaration) = getNameToken(element, SwiftPrecedenceGroupName::class.java)
+    fun getNameIdentifier(element: SwiftPrecedenceGroupDeclaration): PsiElement? {
+        return getNameToken(element, SwiftPrecedenceGroupName::class.java)
+    }
     @JvmStatic
     fun getNameIdentifier(element: SwiftProtocolDeclaration) = getNameToken(element, SwiftProtocolName::class.java)
     @JvmStatic
-    fun getNameIdentifier(element: SwiftProtocolAssociatedTypeDeclaration) = getNameToken(element, SwiftTypealiasName::class.java)
+    fun getNameIdentifier(element: SwiftProtocolAssociatedTypeDeclaration): PsiElement? {
+        return getNameToken(element, SwiftTypealiasName::class.java)
+    }
     @JvmStatic
     fun getNameIdentifier(element: SwiftProtocolVariableDeclaration) = getNameToken(element, SwiftVariableName::class.java)
     @JvmStatic
     fun getNameIdentifier(element: SwiftStructDeclaration) = getNameToken(element, SwiftStructName::class.java)
     @JvmStatic
-    fun getNameIdentifier(element: SwiftTuplePatternElement) = getNameToken(element, SwiftTuplePatternElementName::class.java)
+    fun getNameIdentifier(element: SwiftTuplePatternElement): PsiElement? {
+        return getNameToken(element, SwiftTuplePatternElementName::class.java)
+    }
     @JvmStatic
     fun getNameIdentifier(element: SwiftTypealiasDeclaration) = getNameToken(element, SwiftTypealiasName::class.java)
     @JvmStatic

@@ -8,6 +8,11 @@
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
+    <extensionPoints>
+        <extensionPoint name="com.intellij.platform.lsp.serverSupportProvider"
+                        interface="com.intellij.platform.lsp.api.LspServerSupportProvider"/>
+    </extensionPoints>
+
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.makememonad.turbofan.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
         <postStartupActivity implementation="com.makememonad.turbofan.startup.MyProjectActivity" />
@@ -23,11 +28,12 @@
                 hashBangs=""
         />
         <lang.parserDefinition language="swift" implementationClass="com.makememonad.turbofan.language.swift.SwiftParserDefinition"/>
-        <colorSettingsPage implementation="com.makememonad.turbofan.language.swift.SwiftColorSettingsPage"/>
+        <colorSettingsPage implementation="com.makememonad.turbofan.language.swift.highlighter.SwiftColorSettingsPage"/>
         <lang.syntaxHighlighterFactory
                 language="swift"
-                implementationClass="com.makememonad.turbofan.language.swift.SwiftSyntaxHighlighterFactory"/>
+                implementationClass="com.makememonad.turbofan.language.swift.highlighter.SwiftSyntaxHighlighterFactory"/>
         <colorSettingsPage
-                implementation="com.makememonad.turbofan.language.swift.SwiftColorSettingsPage"/>
+                implementation="com.makememonad.turbofan.language.swift.highlighter.SwiftColorSettingsPage"/>
+        <com.intellij.platform.lsp.serverSupportProvider implementation="com.makememonad.turbofan.language.swift.lsp.SwiftLspServerSupportProvider"/>
     </extensions>
 </idea-plugin>

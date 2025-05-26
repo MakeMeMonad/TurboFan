@@ -21,12 +21,26 @@ object SwiftElementFactory {
         val actorName: PsiElement? = actorDecl.getNameIdentifier
         return actorName
     }
+    fun createCaptureListItemName (project: Project, name: String): PsiElement? {
+        val dummyCode = "$name "
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val captureListItem = (file.firstChild as? SwiftCaptureListItem) ?: return null
+        val captureListItemName: PsiElement? = captureListItem.getNameIdentifier
+        return captureListItemName
+    }
     fun createClassName(project: Project, name: String): PsiElement? {
         val dummyCode = "class $name {}"
         val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
         val classDecl = (file.firstChild as? SwiftClassDeclaration) ?: return null
         val className: PsiElement? = classDecl.getNameIdentifier
         return className
+    }
+    fun createClosureParameterName(project: Project, name: String): PsiElement? {
+        val dummyCode = "$name: Int"
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val closureParam = (file.firstChild as? SwiftClosureParameter) ?: return null
+        val closureParamName: PsiElement? = closureParam.getNameIdentifier
+        return closureParamName
     }
     fun createEnumName(project: Project, name: String): PsiElement? {
         val dummyCode = "enum $name {}"
@@ -49,6 +63,13 @@ object SwiftElementFactory {
         val rawValueStyleEnumCaseName: PsiElement? = rawValueStyleEnumCase.getNameIdentifier
         return rawValueStyleEnumCaseName
     }
+    fun createExternalParameterName(project: Project, name: String): PsiElement? {
+        val dummyCode = "extern $name: Int"
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val externalParam = (file.firstChild as? SwiftExternalParameterNameHolder) ?: return null
+        val externalParamName: PsiElement? = externalParam.getNameIdentifier
+        return externalParamName
+    }
     fun createFunctionName(project: Project, name: String): PsiElement? {
         val dummyCode = "func $name() {}"
         val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
@@ -56,12 +77,26 @@ object SwiftElementFactory {
         val funcName: PsiElement? = funcDecl.getNameIdentifier
         return funcName
     }
+    fun createGenericParameterTypeName(project: Project, name: String): PsiElement? {
+        val dummyCode = "<$name>"
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val genericParameter = (file.firstChild as? SwiftGenericParameter) ?: return null
+        val genericParameterTypeName: PsiElement? = genericParameter.getNameIdentifier
+        return genericParameterTypeName
+    }
     fun createIdentifierPatternName(project: Project, name: String): PsiElement? {
         val dummyCode = "$name "
         val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
         val identifierPattern = (file.firstChild as? SwiftIdentifierPattern) ?: return null
         val identPatternName: PsiElement? = identifierPattern.getNameIdentifier
         return identPatternName
+    }
+    fun createInternalParameterName(project: Project, name: String): PsiElement? {
+        val dummyCode = "internal $name: Int"
+        val file = PsiFileFactory.getInstance(project).createFileFromText("dummy.swift", SwiftFileType, dummyCode)
+        val internalParam = (file.firstChild as? SwiftInternalParameterNameHolder) ?: return null
+        val internalParamName: PsiElement? = internalParam.getNameIdentifier
+        return internalParamName
     }
     fun createMacroName(project: Project, name: String): PsiElement? {
         val dummyCode = "#macro $name {}"
