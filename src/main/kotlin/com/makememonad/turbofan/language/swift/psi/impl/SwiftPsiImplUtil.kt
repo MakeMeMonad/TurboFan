@@ -33,17 +33,16 @@ object SwiftPsiImplUtil {
     }
     @JvmStatic
     fun getName(element: SwiftAttribute): String? = getNameText(element, SwiftAttributeName::class.java)
-
     @JvmStatic
-    fun getName(element: SwiftActorDeclaration) = getNameText(element, SwiftActorName::class.java)
+    fun getName(element: SwiftActorDeclaration): String? = getNameText(element, SwiftActorName::class.java)
     @JvmStatic
-    fun getName(element: SwiftCaptureListItem) = getNameText(element, SwiftCaptureListItemName::class.java)
+    fun getName(element: SwiftCaptureListItem): String? = getNameText(element, SwiftCaptureListItemName::class.java)
     @JvmStatic
-    fun getName(element: SwiftClassDeclaration) = getNameText(element, SwiftClassName::class.java)
+    fun getName(element: SwiftClassDeclaration): String? = getNameText(element, SwiftClassName::class.java)
     @JvmStatic
-    fun getName(element: SwiftClosureParameter) = getNameText(element, SwiftClosureParameterName::class.java)
+    fun getName(element: SwiftClosureParameter): String? = getNameText(element, SwiftClosureParameterName::class.java)
     @JvmStatic
-    fun getName(element: SwiftEnumDeclaration) = getNameText(element, SwiftEnumName::class.java)
+    fun getName(element: SwiftEnumDeclaration): String? = getNameText(element, SwiftEnumName::class.java)
     @JvmStatic
     fun getName(element: SwiftExternalParameterNameHolder) = getNameText(element, SwiftExternalParameterName::class.java)
     @JvmStatic

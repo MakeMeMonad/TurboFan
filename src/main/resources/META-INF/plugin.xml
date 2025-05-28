@@ -4,13 +4,14 @@
     <name>TurboFan</name>
     <vendor>makememonad</vendor>
 
-    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.ultimate</depends>
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
+    <resource-bundle>
+        messages.MyBundle
+    </resource-bundle>
 
     <extensionPoints>
-        <extensionPoint name="com.intellij.platform.lsp.serverSupportProvider"
-                        interface="com.intellij.platform.lsp.api.LspServerSupportProvider"/>
+
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -34,6 +35,5 @@
                 implementationClass="com.makememonad.turbofan.language.swift.highlighter.SwiftSyntaxHighlighterFactory"/>
         <colorSettingsPage
                 implementation="com.makememonad.turbofan.language.swift.highlighter.SwiftColorSettingsPage"/>
-        <com.intellij.platform.lsp.serverSupportProvider implementation="com.makememonad.turbofan.language.swift.lsp.SwiftLspServerSupportProvider"/>
     </extensions>
 </idea-plugin>

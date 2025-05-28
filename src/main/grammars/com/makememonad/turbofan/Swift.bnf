@@ -109,194 +109,101 @@
 
   // KEY DECLARATIONS
   attribute ::= (OP_AT attribute-name attribute-argument-clause?) {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   actor-declaration ::= attributes? access-level-modifier? KW_ACTOR actor-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? actor-body {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   capture-list-item ::=
   capture-specifier? capture-list-item-name
   | capture-specifier? capture-list-item-name OP_ASSIGNMENT expression
   | capture-specifier? self-expression {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier
-  PsiElement setName(String name)
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName]
   }
   class-declaration ::=
   attributes? class-access KW_CLASS class-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? class-body {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   closure-parameter ::= closure-parameter-name type-annotation? | closure-parameter-name type-annotation ELLIPSIS {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier
-  PsiElement setName(String name)
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   constant-declaration ::= attributes? declaration-modifiers? KW_LET pattern-initializer-list {
-  methods [
-  List<String> getDeclaredNames()
-  List<PsiElement> getDeclaredIdentifiers()
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  methods=[getDeclaredNames getDeclaredIdentifiers getPresentation getDocumentationTarget]
   }
   deinitializer-declaration ::= (attributes? KW_DEINIT code-block) {methods []}
   enum-declaration ::= attributes? access-level-modifier? (union-style-enum | raw-value-style-enum) {
-  methods [
-  String getName()
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  methods=[getName getPresentation getDocumentationTarget]
   }
   extension-declaration ::=
   attributes? access-level-modifier? KW_EXTENSION type-identifier type-inheritance-clause? generic-where-clause? extension-body {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   function-declaration ::=
   function-head function-declaration-name generic-parameter-clause? function-signature generic-where-clause?  code-block? {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  SwiftFunctionBody getBody()
-  List<SwiftParameter> getParameters()
-  List<String> getParameterNames()
-  SwiftType getReturnType()
-  boolean isAsync()
-  boolean isThrows()
-  boolean isStatic()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   generic-parameter ::= generic-parameter-type-name (COLON type-identifier | COLON protocol-composition-type)? {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier
-  PsiElement setName(String name)
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName]
   }
   import-declaration ::= attributes? KW_IMPORT import-kind? import-path {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiReference getReference()
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  methods=[getName getNameIdentifier getReference getPresentation getDocumentationTarget]
   }
   initializer-declaration ::= initializer-head generic-parameter-clause? parameter-clause KW_ASYNC? (KW_RETHROWS | throws-clause?) generic-where-clause? code-block {
-  methods [
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  methods=[getPresentation getDocumentationTarget]
   }
   macro-declaration ::= macro-head macro-name generic-parameter-clause? macro-signature macro-definition? generic-where-clause {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   macro-expansion-expression ::=
   POUND macro-expansion-expression-name generic-argument-clause? function-call-argument-clause? trailing-closures? {
-  methods [String getName()
-  ]
+  methods=[getName]
   }
   operator-declaration ::= prefix-operator-declaration | postfix-operator-declaration | infix-operator-declaration {
-  methods [
-  ]
+  methods=[]
   }
   precedence-group-declaration ::= KW_PRECEDENCEGROUP precedence-group-name (LBRACE precedence-group-attributes? RBRACE) {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   protocol-declaration ::= attributes? access-level-modifier? KW_LOWER_PROTOCOL_DECL protocol-name type-inheritance-clause? generic-where-clause? protocol-body {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   struct-declaration ::= attributes? access-level-modifier? KW_STRUCT struct-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? struct-body {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   subscript-declaration ::= subscript-head subscript-result generic-where-clause? (code-block | getter-setter-block | getter-setter-keyword-block) {
-  methods []
+  methods=[]
   }
   typealias-declaration ::= attributes? access-level-modifier? KW_TYPEALIAS typealias-name generic-parameter-clause? typealias-assignment {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
   variable-declaration ::= variable-declaration-head (pattern-initializer-list | variable-name (type-annotation (code-block | getter-setter-block | getter-setter-keyword-block ) | initializer willSet-didSet-block | type-annotation initializer? willSet-didSet-block)) {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)
-  ItemPresentation getPresentation()
-  PsiElement getDocumentationTarget()
-  ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName getPresentation]
   }
-
 
   // SUB-DECLARATIONS
   // Enum Case Declarations
   union-style-enum-case ::= enum-case-name tuple-type? {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)]}
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName]
+  }
   raw-value-style-enum-case ::= enum-case-name raw-value-assignment? {
-  methods [
-  String getName()
-  PsiElement getNameIdentifier()
-  PsiElement setName(String name)]}
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName]
+  }
   // Protocol Member & Method Declarations
     protocol-member-declaration ::=
     // protocol-property-declaration |
@@ -305,19 +212,13 @@
     private protocol-initializer-declaration ::= initializer-head generic-parameter-clause? parameter-clause throws-clause? generic-where-clause? | initializer-head generic-parameter-clause? parameter-clause KW_RETHROWS generic-where-clause?
     private protocol-subscript-declaration ::= subscript-head subscript-result generic-where-clause? getter-setter-keyword-block
     protocol-associated-type-declaration ::= attributes? access-level-modifier? KW_ASSOCIATEDTYPE typealias-name type-inheritance-clause? typealias-assignment? generic-where-clause? {
-    methods [
-    String getName()
-    PsiElement getNameIdentifier()
-    PsiElement setName(String name)
-    ]
-    }
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName]
+  }
     protocol-variable-declaration ::= variable-declaration-head variable-name type-annotation getter-setter-keyword-block {
-    methods [
-    String getName()
-    PsiElement getNameIdentifier()
-    PsiElement setName(String name)
-    ]
-    }
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName]
+  }
 
 
   // KEY DECLARATION NAMES
@@ -391,28 +292,22 @@
   private parameter-list ::= parameter (COMMA parameter)*
   parameter ::=
   external-parameter-name-holder? internal-parameter-name-holder parameter-type-annotation (KW_ELLIPSIS | default-argument-clause?)? {
-    methods [
-    String external getExternalName()
-    String external getInternalName()
-    PsiElement external getExternalNameIdentifier()
-    PsiElement external getInternalNameIdentifier()
+    methods=[
+    external getExternalName
+    external getInternalName
+    external getExternalNameIdentifier
+    external getInternalNameIdentifier
     // Add reference later, probably..?
     ]
   }
   external-parameter-name-holder ::= external-parameter-name {
-    methods [
-    String getName()
-    PsiElement getNameIdentifier()
-    PsiElement setName(String newName)
-    ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName]
   }
   external-parameter-name ::= IDENTIFIER
   internal-parameter-name-holder ::= internal-parameter-name {
-    methods [
-    String getName()
-    PsiElement getNameIdentifier()
-    PsiElement setName(String newName)
-    ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName]
   }
   internal-parameter-name ::= IDENTIFIER
   private parameter-type-annotation ::= COLON attributes? parameter-modifier? type
@@ -575,9 +470,7 @@
   pattern ::=
   base-pattern type-casting-suffix?
   | type-checking-pattern {
-    methods [
-    collectNames()
-    ]
+    methods=[collectNames]
   }
   private base-pattern ::=
   ((wildcard-pattern | identifier-pattern | tuple-pattern) type-annotation?)
@@ -590,25 +483,19 @@
   private type-checking-pattern ::= (OP_TYPE_CHECK type)
   private wildcard-pattern ::= KW_UNDERSCORE
   identifier-pattern ::= IDENTIFIER {
-    methods [
-    String getName()
-    PsiElement getNameIdentifier()
-    PsiElement setName(String name)
-    ]
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName getNameIdentifier setName]
   }
   private value-binding-pattern ::= (KW_VAR | KW_LET) pattern
   private tuple-pattern ::= (LPAREN tuple-pattern-element-list? RPAREN)
   private tuple-pattern-element-list ::= tuple-pattern-element (COMMA tuple-pattern-element)*
+  // TODO: Consolidate methods on tuple-pattern-element and tuple-pattern-element-name and have the one implementing the methods implement the PsiNameIdentifierOwner interface as well
   tuple-pattern-element ::= pattern | tuple-pattern-element-name {
-    methods[
-    PsiElement getNameIdentifier()
-    ]
+  methods=[getNameIdentifier]
   }
   tuple-pattern-element-name ::= IDENTIFIER COLON pattern {
-    methods [
-    String getName()
-    PsiElement setName(String name)
-    ]
+  implements="com.intellij.psi.PsiNamedElement"
+  methods=[getName setName]
   }
   private enum-case-pattern ::= type-identifier? DOT enum-case-name tuple-pattern?
   private optional-pattern ::= identifier-pattern OP_QUESTION
@@ -639,7 +526,7 @@
   function-type ::= attributes? function-type-arguments-clause KW_ASYNC? throws-clause? KW_FWD_ARROW type
   private function-type-arguments-clause ::= LPAREN (function-type-arguments-list KW_ELLIPSIS?)? RPAREN
   function-type-arguments-list ::= function-type-argument (COMMA function-type-argument)*
-  function-type-argument ::= attributes? KW_INOUT? type | function-argument-name type-annotation
+  function-type-argument ::= attributes? KW_INOUT? type | function-type-argument-name type-annotation
   function-type-argument-name ::= IDENTIFIER
   private throws-clause ::= KW_THROWS (LPAREN type RPAREN)?
   // Array Type
@@ -658,10 +545,10 @@
   // BEGIN EXPRESSION SECTION
   // Literals
   literal ::= numeric-literal | string-literal | regular-expression-literal | boolean-literal | nil-literal
-  boolean-literal ::= KW_TRUE | KW_FALSE
+  private boolean-literal ::= KW_TRUE | KW_FALSE
   private nil-literal ::= KW_NIL
   // String Literals
-    string-literal ::= static-string-literal | interpolated-string-literal
+  string-literal ::= static-string-literal | interpolated-string-literal
   //string-literal-opening-delimiter → extended-string-literal-delimiter? "
   //string-literal-closing-delimiter → " extended-string-literal-delimiter?
   static-string-literal ::= singleline-string | multiline-string
@@ -736,9 +623,7 @@
   private function-call-argument-list ::= function-call-argument (COMMA function-call-argument)*
   function-call-argument ::= function-call-argument-label? (expression | OPERATOR)
   function-call-argument-label ::= (IDENTIFIER COLON) {
-    methods [
-      PsiReference getReference()
-    ]
+    methods=[getReference]
   }
   private trailing-closures ::= closure-expression (trailing-closure-label closure-expression)*
   private trailing-closure-label ::= IDENTIFIER COLON
