@@ -35,5 +35,11 @@
                 implementationClass="com.makememonad.turbofan.language.swift.highlighter.SwiftSyntaxHighlighterFactory"/>
         <colorSettingsPage
                 implementation="com.makememonad.turbofan.language.swift.highlighter.SwiftColorSettingsPage"/>
+        <platform.lsp.serverSupportProvider
+                implementation="com.makememonad.turbofan.language.swift.lsp.SwiftLspServerSupportProvider"/>
+        <notificationGroup
+                id="TurboFan Notifications"
+                displayType="BALLOON"
+                isLogByDefault="true"/>
     </extensions>
 </idea-plugin>
