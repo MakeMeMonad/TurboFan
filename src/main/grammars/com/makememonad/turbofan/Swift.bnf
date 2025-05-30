@@ -44,6 +44,12 @@
   psiImplUtilClass="com.makememonad.turbofan.language.swift.psi.impl.SwiftPsiImplUtil"
   // elementTypeFactory()= com.makememonad.turbofan.language.swift.psi.stubs.SwiftStubElementTypeFactory.create
   }
+
+  // TODO: Add pin=N where applicable
+  // TODO: Add recoverWhile= where applicable
+  // TODO: Swap the implementation for declaration to the new interface
+
+
   // GRAMMAR RULE DEFINITIONS:
 
 
@@ -109,10 +115,11 @@
 
   // KEY DECLARATIONS
   attribute ::= (OP_AT attribute-name attribute-argument-clause?) {
-  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  implements="com.makememonad.turbofan.language.swift.psi.SwiftTypeDeclaration"
   methods=[getName getNameIdentifier setName getPresentation]
   }
-  actor-declaration ::= attributes? access-level-modifier? KW_ACTOR actor-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? actor-body {
+  actor-declaration ::=
+  attributes? access-level-modifier? KW_ACTOR actor-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? actor-body {
   implements="com.intellij.psi.PsiNameIdentifierOwner"
   methods=[getName getNameIdentifier setName getPresentation]
   }
@@ -521,7 +528,8 @@
   private type-name ::= IDENTIFIER
   // Tuple Type
   private tuple-type ::= LPAREN (tuple-type-element (COMMA tuple-type-element)+)? RPAREN
-  private tuple-type-element ::= IDENTIFIER type-annotation | type
+  private tuple-type-element ::= tuple-type-element-name type-annotation | type
+  private tuple-type-element-name ::= IDENTIFIER
   // Function Types
   function-type ::= attributes? function-type-arguments-clause KW_ASYNC? throws-clause? KW_FWD_ARROW type
   private function-type-arguments-clause ::= LPAREN (function-type-arguments-list KW_ELLIPSIS?)? RPAREN
@@ -580,7 +588,8 @@
   private infix-expression ::= infix-operator prefix-expression | OP_ASSIGNMENT try-operator? KW_AWAIT? prefix-expression | conditional-operator try-operator? KW_AWAIT? prefix-expression | type-casting-operator
   private conditional-operator ::= (OP_QUESTION expression COLON)
   private type-casting-operator ::= (OP_TYPE_CHECK | OP_TYPE_CAST (OP_QUESTION | OP_NOT)?) type
-  private primary-expression ::= IDENTIFIER generic-argument-clause? | literal-expression | self-expression | superclass-expression | conditional-expression | closure-expression | parenthesized-expression | tuple-expression | implicit-member-expression | wildcard-expression | macro-expansion-expression | key-path-expression | selector-expression | key-path-string-expression
+  private primary-expression ::= primary-expression-identifier generic-argument-clause? | literal-expression | self-expression | superclass-expression | conditional-expression | closure-expression | parenthesized-expression | tuple-expression | implicit-member-expression | wildcard-expression | macro-expansion-expression | key-path-expression | selector-expression | key-path-string-expression
+  private primary-expression-identifier ::= IDENTIFIER
   private literal-expression ::= literal | array-literal | dictionary-literal | playground-literal
   private array-literal ::= (LBRACKET array-literal-items? COMMA? RBRACKET)
   private array-literal-items ::= expression (COMMA expression)*
@@ -590,11 +599,13 @@
   private playground-literal ::=
   (KW_PND_COLORLITERAL (LPAREN (("red" COLON expression) COMMA) (("green" COLON expression) COMMA) (("blue" COLON expression) COMMA) (("alpha" COLON expression) COMMA?) RPAREN)) | (KW_PND_FILELITERAL | KW_PND_IMAGELITERAL) (LPAREN "resourceName" COLON expression RPAREN)
   private self-expression ::= KW_LOWER_SELF | self-method-expression | self-subscript-expression | self-initializer-expression
-  private self-method-expression ::= (KW_LOWER_SELF DOT IDENTIFIER)
+  private self-method-expression ::= (KW_LOWER_SELF DOT self-method-expression-identifier)
+  private self-method-expression-identifier ::= IDENTIFIER
   private self-subscript-expression ::= KW_LOWER_SELF (LBRACKET function-call-argument-list RBRACKET)
   private self-initializer-expression ::= (KW_LOWER_SELF DOT KW_INIT)
   private superclass-expression ::= superclass-method-expression | superclass-subscript-expression | superclass-initializer-expression
-  private superclass-method-expression ::= (KW_SUPER DOT IDENTIFIER)
+  superclass-method-expression ::= (KW_SUPER DOT superclass-method-expression-identifier)
+  private superclass-method-expression-identifier ::= IDENTIFIER
   private superclass-subscript-expression ::= KW_SUPER LBRACKET function-call-argument-list RBRACKET
   private superclass-initializer-expression ::= KW_SUPER DOT KW_INIT
   conditional-expression ::= if-expression | switch-expression
@@ -603,15 +614,15 @@
   private switch-expression ::= KW_SWITCH expression (LBRACE switch-expression-cases RBRACE)
   private switch-expression-cases ::= switch-expression-case (switch-expression-case)*
   private switch-expression-case ::= case-label statement | default-label statement
-  private implicit-member-expression ::= DOT IDENTIFIER | DOT IDENTIFIER DOT postfix-expression
+  private implicit-member-expression ::= DOT misc-wrapped-identifier-token | DOT misc-wrapped-identifier-token DOT postfix-expression
   private parenthesized-expression ::= (LPAREN expression RPAREN)
   private tuple-expression ::= (LPAREN (tuple-element COMMA tuple-element-list)? RPAREN)
   private tuple-element-list ::= tuple-element (COMMA tuple-element)*
-  private tuple-element ::= expression | (IDENTIFIER COLON expression)
+  private tuple-element ::= expression | (misc-wrapped-identifier-token COLON expression)
   private wildcard-expression ::= OP_UNDERSCORE
   private key-path-expression ::= (BACKSLASH type? DOT key-path-components)
   private key-path-components ::= key-path-component (DOT key-path-component)*
-  private key-path-component ::= IDENTIFIER key-path-postfixes? | key-path-postfixes
+  private key-path-component ::= misc-wrapped-identifier-token key-path-postfixes? | key-path-postfixes
   private key-path-postfixes ::= key-path-postfix (key-path-postfix)*
   private key-path-postfix ::= OP_QUESTION | OP_NOT | KW_LOWER_SELF | (LBRACKET function-call-argument-list RBRACKET)
   private selector-expression ::= KW_PND_SELECTOR (LPAREN expression RPAREN) | KW_PND_SELECTOR (LPAREN "getter" COLON expression RPAREN) | KW_PND_SELECTOR (LPAREN "setter" COLON expression RPAREN)
@@ -622,16 +633,16 @@
   private function-call-argument-clause ::= (LPAREN function-call-argument-list? RPAREN)
   private function-call-argument-list ::= function-call-argument (COMMA function-call-argument)*
   function-call-argument ::= function-call-argument-label? (expression | OPERATOR)
-  function-call-argument-label ::= (IDENTIFIER COLON) {
+  function-call-argument-label ::= (misc-wrapped-identifier-token COLON) {
     methods=[getReference]
   }
   private trailing-closures ::= closure-expression (trailing-closure-label closure-expression)*
-  private trailing-closure-label ::= IDENTIFIER COLON
+  private trailing-closure-label ::= misc-wrapped-identifier-token COLON
   private initializer-expression ::= (DOT KW_INIT) (LPAREN argument-names RPAREN)?
   private explicit-member-expression ::=
-  (DOT DECIMAL_LITERAL | DOT IDENTIFIER (LPAREN argument-names RPAREN | generic-argument-clause?) | conditional-compilation-block)
+  (DOT DECIMAL_LITERAL | DOT misc-wrapped-identifier-token (LPAREN argument-names RPAREN | generic-argument-clause?) | conditional-compilation-block)
   private argument-names ::= argument-name (argument-name)*
-  private argument-name ::= (IDENTIFIER COLON)
+  private argument-name ::= (misc-wrapped-identifier-token COLON)
   private postfix-self-expression ::= (DOT KW_LOWER_SELF)
   private subscript-expression ::= (LBRACKET function-call-argument-list RBRACKET)
   private forced-value-expression ::= (OP_NOT)
@@ -665,13 +676,30 @@
   getter-setter-block ::= code-block | (LBRACE getter-clause setter-clause? RBRACE) | (LBRACE setter-clause getter-clause RBRACE)
   getter-clause ::= attributes? mutation-modifier? KW_GET code-block
   setter-clause ::= attributes? mutation-modifier? KW_SET setter-name? code-block
-  setter-name ::= (LPAREN IDENTIFIER RPAREN)
+  setter-name ::= (LPAREN misc-wrapped-identifier-token RPAREN)
   getter-setter-keyword-block ::= (LBRACE getter-keyword-clause setter-keyword-clause? RBRACE) | (LBRACE setter-keyword-clause getter-keyword-clause RBRACE)
   getter-keyword-clause ::= attributes? mutation-modifier? KW_GET
   setter-keyword-clause ::= attributes? mutation-modifier? KW_SET
   willSet-didSet-block ::= (LBRACE willSet-clause didSet-clause? RBRACE) | (LBRACE didSet-clause willSet-clause? RBRACE)
   willSet-clause ::= attributes? KW_WILLSET setter-name? code-block
   didSet-clause ::= attributes? KW_DIDSET setter-name? code-block
+
+
+  // TOKEN WRAPPING RULES
+  misc-wrapped-identifier-token ::= IDENTIFIER
+
+// ERROR RECOVERY RULES
+  private skip-until-rbrace ::= !RBRACE
+  private skip-until-rparen ::= !RPAREN
+  private skip-until-rbracket ::= !RBRACKET
+  private skip-until-rangle ::= !OP_RANGLE
+  private skip-until-semicolon ::= !SEMICOLON
+  private skip-until-comma ::= !COMMA
+  private skip-until-rangle-or-comma ::= !(OP_RANGLE | COMMA)
+  private skip-until-decl-or-brace ::=
+  !(KW_FUNC | KW_STRUCT | KW_CLASS | KW_ENUM | KW_PROTOCOL | KW_ACTOR | LBRACE | RBRACE)
+  private skip-until-top-level-decl ::=
+  !(KW_FUNC | KW_STRUCT | KW_CLASS | KW_ENUM | KW_PROTOCOL | KW_ACTOR | KW_TYPEALIAS | KW_VAR | KW_LET | KW_IMPORT | KW_EXTENSION | KW_OPERATOR | KW_PRECEDENCEGROUP | KW_INIT | KW_DEINIT | KW_SUBSCRIPT | KW_MACRO | EOF)
 
 
   // TOKEN GROUPING RULES:

@@ -1,6 +1,20 @@
-.gradle
-.idea
-.intellijPlatform
-.qodana
+# Gradle & Build
+.gradle/
+build/
+out/
+tools/
+
+# JetBrains/IntelliJ
+.idea/
+.run/
+*.iml
+.intellijPlatform/
+.qodana/
 .aiignore
-build
+
+# OS/Editor/System
+.DS_Store
+Thumbs.db
+
+# Don't ignore gradle wrapper jar (important for cross-platform builds)
+!gradle/wrapper/gradle-wrapper.jar
