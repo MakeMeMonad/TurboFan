@@ -7,7 +7,8 @@
 <!-- Plugin description -->
 ## Who ~~Built~~ Is Building TurboFan?
 
-TODO: Need an intro here...
+TurboFan is built by Gale, a disabled indie developer passionate about accessibility and modern tooling, with support from the open source community.
+All contributors welcome!
 
 ## What is TurboFan?
 TurboFan is an in-development plugin for the JetBrains IDE ecosystem, aiming to bring modern, full-featured support for the Swift language and toolchain to JetBrains editors—especially CLion. Inspired by the legacy of AppCode and the growing, cross-platform Swift community, TurboFan’s goal is to make Swift development accessible, customizable, and fun on any platform, for any developer.
@@ -25,65 +26,61 @@ The existing options for Swift outside Xcode are limited and often not truly ope
 ---
 ## Current Features / Status
 
-- [x] Syntax highlighting (Partial)
-- [x] Parsing/tokenizing foundations
-- [ ] LSP integration (in progress)
-- [ ] Project model integration (planned)
-- [ ] Refactoring & navigation (planned)
+- [x] Parsing/tokenizing foundations (experimental)
+  - Nearly complete coverage of the Swift 6.1 spec, including single pass lexing of string interpolation.
+- [x] Syntax highlighting (partial)
+  - Syntax highlighting for most Swift constructs, with full coverage in progress.
+- [ ] LSP integration (experimental)
+- [ ] Refactoring & navigation (in progress)
+  - Hmmm
 - [ ] SwiftPM project support (planned)
+- [ ] SwiftPM Build System integration (planned)
 - [ ] Marketplace release (soon!)
 
 For bleeding-edge status, see the [roadmap](#roadmap) or [issues](https://github.com/MakeMeMonad/TurboFan/issues).
 
 ---
 ## Resources
-Want to help? Or just curious? Feel free to open issues, make suggestions, or drop by and say hi. I love talking about accessibility, language design, JetBrains APIs, Swift, F#, and all kinds of nerdy topics—don’t be shy!
-
----
-## Installation
-**TurboFan is still in early development.**  
-Not yet on JetBrains Marketplace—installation instructions will appear here when a preview is available.
-
-For contributors: see [CONTRIBUTING.md](./CONTRIBUTING.md).
+Want to help? Or just curious? Feel free to open issues and discussions, make suggestions, or drop by and say hi. I love talking about accessibility, tech, JetBrains APIs, Swift, F#, and all kinds of nerdy topics—don’t be shy!
+Whether you want to help, ask questions, or just lurk, you’re always welcome!
 
 ---
 ## Getting Help / Contributing
-- See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup, development, and community guidelines.
+- See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup, development, and guidelines.
 - [Code of Conduct](./CODE_OF_CONDUCT.md): All participation should be respectful and inclusive.
-- Questions, ideas, or bug reports? [Open an issue](https://github.com/MakeMeMonad/TurboFan/issues) or
+- Questions, ideas, or bug reports? [Open an issue](https://github.com/MakeMeMonad/TurboFan/issues), start a [Discussion](https://github.com/MakeMeMonad/TurboFan/discussions), or
   email [maintainers@makememonad.com](mailto:maintainers@makememonad.com).
-- Discussions: (link here if enabled!)
 
 ---
 ## Roadmap
+- [ ] Proper handling of extended delimiters in string literals
 - [ ] Full implementation of reference resolution via PsiReference
-- [ ] Two
 
-_(For the latest roadmap, see [issues](https://github.com/MakeMeMonad/TurboFan/issues)
+_(The roadmap is evolving. For the latest, please see [issues](https://github.com/MakeMeMonad/TurboFan/issues)
 or [project boards](https://github.com/MakeMeMonad/TurboFan/projects)!)_
 
 ---
 ## Pipes and Dreams
-eventually be a whole multi-platofmr Swift/Obj-C/C++/C IDE based on the IntelliJ platform
-
----
-## License
-TurboFan is licensed under the [Apache 2.0 License](./LICENSE.md).
+Blue-sky ideas and wild ambitions for TurboFan’s long-term future!
+- Full coverage of IntelliJ feature-set via native endpoints.
+- Implementations for in-development platform features
+  - Workspace API with custom entities
+  - Symbols API
+- Feature parity with the late AppCode
+- Full IDE based upon this foundational plugin
 
 ---
 <!-- Plugin description end -->
-
 ## Installation
+⚠️ TurboFan is still in early development and not yet on JetBrains Marketplace.
 
-### For Contributors (and the super curious)
-See CONTRIBUTORS.md for information on setup.
+Stay tuned! Installation instructions will be added here as soon as the first preview is available.
 
-### For Prospective Users:
-
-⚠️ TurboFan isn’t on JetBrains Marketplace just yet!
-Stay tuned—installation instructions will be added here as soon as the first preview is available.
+For contributors: see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 <!--
+####  For users:
+
 - Using the IDE built-in plugin system:
   
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "TurboFan"</kbd> >
@@ -102,7 +99,12 @@ Stay tuned—installation instructions will be added here as soon as the first p
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 -->
 ---
+## License
+TurboFan is licensed under the [Apache 2.0 License](./LICENSE.md). 
+
 Plugin based on the [IntelliJ Platform Plugin Template][template].
+
+---
 
 [template]: https://github.com/JetBrains/intellij-platform-plugin-template
 [docs:plugin-description]: https://plugins.jetbrains.com/docs/intellij/plugin-user-experience.html#plugin-description-and-presentation
