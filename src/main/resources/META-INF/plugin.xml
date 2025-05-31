@@ -28,6 +28,9 @@
                 implementationClass="com.makememonad.turbofan.language.swift.highlighter.SwiftSyntaxHighlighterFactory"/>
         <colorSettingsPage
                 implementation="com.makememonad.turbofan.language.swift.highlighter.SwiftColorSettingsPage"/>
+        <psi.referenceContributor
+                language="swift"
+                implementation="com.makememonad.turbofan.language.swift.references.SwiftReferenceContributor"/>
         <platform.lsp.serverSupportProvider
                 implementation="com.makememonad.turbofan.language.swift.lsp.SwiftLspServerSupportProvider"/>
         <notificationGroup

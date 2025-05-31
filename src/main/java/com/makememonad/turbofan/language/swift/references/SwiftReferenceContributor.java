@@ -6,6 +6,8 @@ import com.intellij.psi.PsiReferenceRegistrar;
 import com.makememonad.turbofan.language.swift.psi.SwiftTypeName;
 import org.jetbrains.annotations.NotNull;
 
+    // TODO: Add more providers for other kinds of usage patterns
+
 public final class SwiftReferenceContributor extends PsiReferenceContributor {
     @Override
     public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public class SwiftTypeReferenceProvider extends PsiReferenceProvider {
 
     @Override
-    public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+    public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
         // element is a SwiftTypeName
         return new PsiReference[] {new SwiftTypeReference(element)};
     }
