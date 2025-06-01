@@ -3,20 +3,13 @@
     <id>com.github.makememonad.turbofan</id>
     <name>TurboFan</name>
     <vendor>makememonad</vendor>
-
     <depends>com.intellij.modules.ultimate</depends>
 
     <resource-bundle>
         messages.MyBundle
     </resource-bundle>
 
-    <extensionPoints>
-
-    </extensionPoints>
-
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.makememonad.turbofan.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="com.makememonad.turbofan.startup.MyProjectActivity" />
         <fileType
                 name="Swift File"
                 implementationClass="com.makememonad.turbofan.language.swift.SwiftFileType"
@@ -35,6 +28,9 @@
                 implementationClass="com.makememonad.turbofan.language.swift.highlighter.SwiftSyntaxHighlighterFactory"/>
         <colorSettingsPage
                 implementation="com.makememonad.turbofan.language.swift.highlighter.SwiftColorSettingsPage"/>
+        <psi.referenceContributor
+                language="swift"
+                implementation="com.makememonad.turbofan.language.swift.references.SwiftReferenceContributor"/>
         <platform.lsp.serverSupportProvider
                 implementation="com.makememonad.turbofan.language.swift.lsp.SwiftLspServerSupportProvider"/>
         <notificationGroup
@@ -42,4 +38,5 @@
                 displayType="BALLOON"
                 isLogByDefault="true"/>
     </extensions>
+
 </idea-plugin>

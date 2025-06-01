@@ -3,13 +3,56 @@
 
 version: 2
 updates:
+  - # Maintain dependencies for Maven dependencies
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "maven"
+      - "dependabot"
+    reviewers:
+      - "MakeMeMonad"
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+
   # Maintain dependencies for Gradle dependencies
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    target-branch: "dev"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "gradle"
+      - "dependabot"
+    reviewers:
+      - "MakeMeMonad"
+    groups:
+      gradle-dependencies:
+        patterns:
+          - "*"
+
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    target-branch: "dev"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "dependabot"
+    reviewers:
+      - "MakeMeMonad"
+    groups:
+      github-actions-dependencies:
+        patterns:
+          - "*"
