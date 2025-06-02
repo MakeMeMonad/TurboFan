@@ -608,14 +608,7 @@ Underscore = "_"
 	{ImplicitParameterName} {return IMPLICIT_PARAMETER_NAME;}
 	{PropertyWrapperProjection} {return PROPERTY_WRAPPER_PROJECTION;}
 
-    // RULES: --- CUSTOM OPERATORS
-  //   DOT OPERATORS: Matches ".+" ".**." etc.
-  //   NON-DOT OPERATORS: Matches "***" "+++" "<*>" etc.
-  //   REGULAR IDENTIFIERS:
-  // {DotOperatorHead} {DotOperatorCharacter}+ {return DOT_OPERATOR;}
-
-
-  // TODO: uncomment
+  // RULE: UNMATCHED OPERATORS AND IDENTIFIERS
 	{Operator} {return OPERATOR;}
 	{Identifier} {return IDENTIFIER;}
 
