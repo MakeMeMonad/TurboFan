@@ -22,7 +22,7 @@
   generateTokens=true
   generateTokenAccessors=true
   parserClass="com.makememonad.turbofan.language.swift.parser.SwiftParser"
-  parserUtilClass="com.makememonad.turbofan.language.swift.parser.SwiftParserUtil"
+  //parserUtilClass="com.makememonad.turbofan.language.swift.parser.SwiftParserUtil"
   // implements="com.intellij.psi.tree.IElementType"
   // Common base for PSI elements
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
@@ -107,8 +107,8 @@
   private mutation-modifier ::= KW_MUTATING | KW_NONMUTATING
 
   // Higher-Level Groupings of the below Declarations
-  private generic-parameter-clause ::= (OP_LANGLE generic-parameter-list OP_RANGLE)
-  private generic-parameter-list ::= generic-parameter (COMMA generic-parameter)*
+  generic-parameter-clause ::= (OP_LANGLE generic-parameter-list OP_RANGLE)
+  generic-parameter-list ::= generic-parameter (COMMA generic-parameter)*
 
   // KEY DECLARATIONS
   attribute ::= (OP_AT attribute-name attribute-argument-clause?) {
@@ -141,7 +141,8 @@
   }
   deinitializer-declaration ::= (attributes? KW_DEINIT code-block) {methods []}
   enum-declaration ::= attributes? access-level-modifier? (union-style-enum | raw-value-style-enum) {
-  methods=[getName getPresentation getDocumentationTarget]
+  implements="com.makememonad.turbofan.language.swift.psi.SwiftTypeDeclaration"
+  methods=[getName getNameIdentifier setName getPresentation getDocumentationTarget]
   }
   extension-declaration ::=
   attributes? access-level-modifier? KW_EXTENSION type-identifier type-inheritance-clause? generic-where-clause? extension-body {
@@ -238,7 +239,7 @@
   import-name ::= IDENTIFIER
   macro-name ::= IDENTIFIER
   macro-expansion-expression-name ::= IDENTIFIER
-  private precedence-group-name ::= IDENTIFIER
+  precedence-group-name ::= IDENTIFIER
   protocol-name ::= IDENTIFIER
   struct-name ::= IDENTIFIER
   typealias-name ::= IDENTIFIER
@@ -272,15 +273,15 @@
   private closure-parameter-list ::= closure-parameter (COMMA closure-parameter)*
   // Enum & Enum Case Building Blocks
   union-style-enum ::= (KW_INDIRECT? KW_ENUM enum-declaration-name) generic-parameter-clause? type-inheritance-clause? generic-where-clause? (LBRACE union-style-enum-members? RBRACE)
-  private union-style-enum-members ::= union-style-enum-member (union-style-enum-member)*
+  union-style-enum-members ::= union-style-enum-member (union-style-enum-member)*
   private union-style-enum-member ::= declaration | union-style-enum-case-clause | compiler-control-statement
-  private union-style-enum-case-clause ::= attributes? KW_INDIRECT? KW_CASE union-style-enum-case-list
-  private union-style-enum-case-list ::= union-style-enum-case (COMMA union-style-enum-case)*
+  union-style-enum-case-clause ::= attributes? KW_INDIRECT? KW_CASE union-style-enum-case-list
+  union-style-enum-case-list ::= union-style-enum-case (COMMA union-style-enum-case)*
   raw-value-style-enum ::= KW_ENUM enum-declaration-name generic-parameter-clause? type-inheritance-clause generic-where-clause? (LBRACE raw-value-style-enum-members RBRACE)
-  private raw-value-style-enum-members ::= raw-value-style-enum-member (raw-value-style-enum-member)*
+  raw-value-style-enum-members ::= raw-value-style-enum-member (raw-value-style-enum-member)*
   private raw-value-style-enum-member ::= declaration | raw-value-style-enum-case-clause | compiler-control-statement
-  private raw-value-style-enum-case-clause ::= attributes? KW_CASE raw-value-style-enum-case-list
-  private raw-value-style-enum-case-list ::= raw-value-style-enum-case (COMMA raw-value-style-enum-case)*
+  raw-value-style-enum-case-clause ::= attributes? KW_CASE raw-value-style-enum-case-list
+  raw-value-style-enum-case-list ::= raw-value-style-enum-case (COMMA raw-value-style-enum-case)*
   private raw-value-assignment ::= (OP_ASSIGNMENT raw-value-literal)
   private raw-value-literal ::= numeric-literal | static-string-literal | boolean-literal
   // Extension Building Blocks
@@ -292,8 +293,8 @@
   private function-signature ::= parameter-clause KW_ASYNC? (KW_RETHROWS | throws-clause?) function-result?
   private function-result ::= (KW_FWD_ARROW attributes? function-return-type)
   private function-return-type ::= type
-  private parameter-clause ::= (LPAREN parameter-list? RPAREN)
-  private parameter-list ::= parameter (COMMA parameter)*
+  parameter-clause ::= (LPAREN parameter-list? RPAREN)
+  parameter-list ::= parameter (COMMA parameter)*
   parameter ::=
   external-parameter-name-holder? internal-parameter-name-holder parameter-type-annotation (KW_ELLIPSIS | default-argument-clause?)? {
     methods=[
@@ -491,15 +492,15 @@
   methods=[getName getNameIdentifier setName]
   }
   private value-binding-pattern ::= (KW_VAR | KW_LET) pattern
-  private tuple-pattern ::= (LPAREN tuple-pattern-element-list? RPAREN)
-  private tuple-pattern-element-list ::= tuple-pattern-element (COMMA tuple-pattern-element)*
+  tuple-pattern ::= (LPAREN tuple-pattern-element-list? RPAREN)
+  tuple-pattern-element-list ::= tuple-pattern-element (COMMA tuple-pattern-element)*
   // TODO: Consolidate methods on tuple-pattern-element and tuple-pattern-element-name and have the one implementing the methods implement the PsiNameIdentifierOwner interface as well
   tuple-pattern-element ::= pattern | tuple-pattern-element-name {
-  methods=[getNameIdentifier]
+  methods=[]
   }
   tuple-pattern-element-name ::= IDENTIFIER COLON pattern {
   implements="com.intellij.psi.PsiNamedElement"
-  methods=[getName setName]
+  methods=[getName getNameIdentifier setName]
   }
   private enum-case-pattern ::= type-identifier? DOT enum-case-name tuple-pattern?
   private optional-pattern ::= identifier-pattern OP_QUESTION
@@ -521,8 +522,8 @@
   private implicitly-unwrapped-optional-type-suffix ::= OP_NOT
   private metatype-type-suffix ::= (DOT KW_UPPER_TYPE | DOT KW_UPPER_PROTOCOL)
   private type-annotation ::= COLON attributes? KW_INOUT? type
-  private type-identifier ::= type-name generic-argument-clause? (DOT type-name generic-argument-clause?)*
-  private type-name ::= IDENTIFIER
+  type-identifier ::= type-name generic-argument-clause? (DOT type-name generic-argument-clause?)*
+  type-name ::= IDENTIFIER
   // Tuple Type
   private tuple-type ::= LPAREN (tuple-type-element (COMMA tuple-type-element)+)? RPAREN
   private tuple-type-element ::= tuple-type-element-name type-annotation | type
@@ -887,12 +888,10 @@
   token STRING_INTERPOLATION_START
   token STRING_INTERPOLATION_END
 
-  token SINGLELINE_STRING
   token STRING_TEXT
   token STRING_START
   token STRING_END
   token STRING_ESCAPED_SEQUENCE
-  token MULTILINE_STRING
   token MULTILINE_STRING_TEXT
   token MULTILINE_STRING_START
   token MULTILINE_STRING_END
