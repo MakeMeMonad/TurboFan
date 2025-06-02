@@ -1,0 +1,123 @@
+// This is a generated file. Not intended for manual editing.
+package com.makememonad.turbofan.language.swift.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static com.makememonad.turbofan.language.swift.psi.SwiftTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import com.makememonad.turbofan.language.swift.psi.*;
+
+public class SwiftMacroDeclarationImplGen extends ASTWrapperPsiElement implements SwiftMacroDeclaration {
+
+  public SwiftMacroDeclarationImplGen(@NotNull ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull SwiftVisitor visitor) {
+    visitor.visitMacroDeclaration(this);
+  }
+
+  @Override
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof SwiftVisitor) accept((SwiftVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public List<SwiftAttribute> getAttributeList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SwiftAttribute.class);
+  }
+
+  @Override
+  @Nullable
+  public SwiftDeclarationModifiers getDeclarationModifiers() {
+    return findChildByClass(SwiftDeclarationModifiers.class);
+  }
+
+  @Override
+  @Nullable
+  public SwiftExpression getExpression() {
+    return findChildByClass(SwiftExpression.class);
+  }
+
+  @Override
+  @Nullable
+  public SwiftGenericParameterClause getGenericParameterClause() {
+    return findChildByClass(SwiftGenericParameterClause.class);
+  }
+
+  @Override
+  @NotNull
+  public SwiftMacroName getMacroName() {
+    return findNotNullChildByClass(SwiftMacroName.class);
+  }
+
+  @Override
+  @NotNull
+  public SwiftParameterClause getParameterClause() {
+    return findNotNullChildByClass(SwiftParameterClause.class);
+  }
+
+  @Override
+  @NotNull
+  public List<SwiftProtocolCompositionType> getProtocolCompositionTypeList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SwiftProtocolCompositionType.class);
+  }
+
+  @Override
+  @NotNull
+  public List<SwiftType> getTypeList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SwiftType.class);
+  }
+
+  @Override
+  @NotNull
+  public List<SwiftTypeIdentifier> getTypeIdentifierList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SwiftTypeIdentifier.class);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getKwFwdArrow() {
+    return findChildByType(KW_FWD_ARROW);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getKwMacro() {
+    return findNotNullChildByType(KW_MACRO);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getKwWhere() {
+    return findNotNullChildByType(KW_WHERE);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getOpAssignment() {
+    return findChildByType(OP_ASSIGNMENT);
+  }
+
+  @Override
+  public @Nullable String getName() {
+    return SwiftPsiImplUtil.getName(this);
+  }
+
+  @Override
+  public @Nullable PsiElement getNameIdentifier() {
+    return SwiftPsiImplUtil.getNameIdentifier(this);
+  }
+
+  @Override
+  public @NotNull PsiElement setName(@NotNull String newName) {
+    return SwiftPsiImplUtil.setName(this, newName);
+  }
+
+}

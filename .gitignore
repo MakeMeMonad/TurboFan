@@ -18,3 +18,5 @@ Thumbs.db
 
 # Don't ignore gradle wrapper jar (important for cross-platform builds)
 !gradle/wrapper/gradle-wrapper.jar
+
+# Don't ignore generated sources (GitHub Actions CI cannot run the needed plugin for full-featured Grammar-Kit code-gen.)

@@ -20,7 +20,7 @@ class SwiftSyntaxHighlighter: SyntaxHighlighterBase() { companion object {
 	val SINGLELINE_COMMENT_KEYS = arrayOf(TextAttributesKey.createTextAttributesKey("SWIFT_SINGLELINE_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT))
 	val MULTILINE_COMMENT_KEYS = arrayOf(TextAttributesKey.createTextAttributesKey("SWIFT_MULTILINE_COMMENT", DefaultLanguageHighlighterColors.BLOCK_COMMENT))
 	
-	// TODO: Add the rest of the catregories with known default TextAttributeKeys in IntelliJ
+	// TODO: Add the rest of the categories with known default TextAttributeKeys in IntelliJ
 	
 	// ...repeat for COMMENT, KEYWORD, IDENTIFIER, OPERATOR, NUMBER...
 	val EMPTY_KEYS = emptyArray<TextAttributesKey>()
