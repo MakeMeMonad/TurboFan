@@ -565,7 +565,7 @@ Underscore = "_"
 
 		// SPECIAL RULE: RPAREN
 	")" {
-		  if (stateStack.peek() == yystate(STRING_INTERPOLATION_MARKER)) {
+		  if (stateStack.peek() == STRING_INTERPOLATION_MARKER) {
 			  stateStack.pop(); // pop marker state off the stack
 			  yybegin(stateStack.pop()); // pop true prior state off the stack and return to that state
 			  return STRING_INTERPOLATION_END;
@@ -621,37 +621,27 @@ Underscore = "_"
 
 	// RULES: --- String Literal Entry Rules
 
-	// EXT MULTILINE STRING
-  {ExtendedStringLiteralDelimiter}"\"\"\"" {
-    currentExtendedDelimiterLength = yytext().length() - 3;
-    stateStack.push(yystate());
-    yybegin(EXTENDED_MULTILINE_STRING);
-    return EXTENDED_MULTILINE_STRING_START;
-  }
+  // MULTILINE STRING ENTRY (UNIFIED)
+  {MultilineStringLiteralOpeningDelimiter} {
+	      String match = yytext().toString();
+	      int poundCount = 0;
+	      while (poundCount < match.length() && match.charAt(poundCount) == '#') {poundCount++;}
+	      currentExtendedDelimiterLength = poundCount;
+        stateStack.push(yystate());
+	      yybegin(poundCount > 0 ? EXTENDED_MULTILINE_STRING : MULTILINE_STRING);
+	      return poundCount > 0 ? EXTENDED_MULTILINE_STRING_START : MULTILINE_STRING_START;
+      }
 
-	// MUTILINE STRING ENTRY
-	"\"\"\"" {
-		currentExtendedDelimiterLength = 0;
-		stateStack.push(yystate());
-		yybegin(MULTILINE_STRING);
-		return MULTILINE_STRING_START;
-	}
-
-	// EXT STRING ENTRY
-	{ExtendedStringLiteralDelimiter}"\"" {
-		currentExtendedDelimiterLength = yytext().length() - 1;
-		stateStack.push(yystate());
-		yybegin(EXTENDED_STRING);
-		return EXTENDED_STRING_START;
-	}
-
-	// STRING ENTRY
-	"\"" {
-		currentExtendedDelimiterLength = 0;
-		stateStack.push(yystate());
-		yybegin(STRING);
-		return STRING_START;
-	}
+  // STRING START (UNIFIED)
+  {StringLiteralOpeningDelimiter} {
+	      String match = yytext().toString();
+	      int poundCount = 0;
+	      while (poundCount < match.length() && match.charAt(poundCount) == '#') {poundCount++;}
+	      currentExtendedDelimiterLength = poundCount;
+        stateStack.push(yystate());
+	      yybegin(poundCount > 0 ? EXTENDED_STRING : STRING);
+	      return poundCount > 0 ? EXTENDED_STRING_START : STRING_START;
+      }
 
 		// Fallback: Should never be matched. Good practice to have regardless.
 		// *Shudders, imagining the number of bugs I've yet to notice in my code*
@@ -673,7 +663,7 @@ Underscore = "_"
           return STRING_INTERPOLATION_START;
 	}
 		// RULE: CLOSING DELIMITER
-	"\"" {yybegin(stateStack.pop);return STRING_END;}
+	"\"" {yybegin(stateStack.pop());return STRING_END;}
 		// RULES: ESCAPE SEQuences, PROHIBITED NEWLINES, STRING CONTENT
 	{EscapedCharacter} {return STRING_ESCAPED_SEQUENCE;}
 	[\u000A\u000D] {return BAD_CHARACTER;}
@@ -729,30 +719,22 @@ Underscore = "_"
 
     // RULE: CLOSING DELIMITER
     "\""{ExtendedStringLiteralDelimiter} {
-        int matchedNumHashes = yytext().length() - 1;
-        if (matchedNumHashes == currentExtendedDelimiterLength) {
+        int poundCount = yytext().length() - 1;
+        if (poundCount == currentExtendedDelimiterLength) {
             if (!stateStack.isEmpty()) {yybegin(stateStack.pop());}
 			else {yybegin(INITIAL);}
             return EXTENDED_STRING_END;}
 		else {return STRING_TEXT;}
     }
 
-    // RULE: ESC DELIMITER OR BACKSLASH
-    "\\" {
-        // Action code attempts to check for an escaped delimiter: \ + N '#' + "
-        // Simplified placeholder version due to yyinput() and pushback complexities.
-        if (currentExtendedDelimiterLength > 0) {
-            boolean hashesMatch = true;
-            for (int i = 0; i < currentExtendedDelimiterLength; i++) {
-                int charN = yyinput();
-                if (charN == YYEOF || (char) charN != '#') {hashesMatch = false;break;}
-			}
-            if (hashesMatch) {
-                int charQuote = yyinput();
-                if (charQuote != YYEOF && (char) charQuote == '"') {}
-				else {}}else {}}
-        return STRING_TEXT;
+    // Escaped Quote/Delimiter: (best effort, may need parser help for full generality)
+    "\\"{ExtendedStringLiteralDelimiter}"\"" {
+        int poundCount = yytext().length() - 2; // \ plus N # plus "
+        if (poundCount == currentExtendedDelimiterLength) {
+            return STRING_ESCAPED_SEQUENCE;
+        } else { return STRING_TEXT; }
     }
+
 		// RULE: PROHIBITED NEWLINES
 	[\r\n] {return BAD_CHARACTER;}
 		// RULE: EXTENDED STRING CONTENT
@@ -766,46 +748,44 @@ Underscore = "_"
 <EXTENDED_MULTILINE_STRING> {
 
 	// RULE: INTERPOLATION START
-	"\\{ExtendedDelimiter}(" {
+  "\\"{ExtendedStringLiteralDelimiter}"(" {
 		if (currentExtendedDelimiterLength == yytext().length() - 2 ){
 			stateStack.push(yystate());
 			stateStack.push(STRING_INTERPOLATION_MARKER);
 			yybegin(INITIAL);
-			return STRING_INTERPOLATION_START;}
-		else {return MULTILINE_STRING_TEXT;}
+			return STRING_INTERPOLATION_START;
+		} else {return MULTILINE_STRING_TEXT;}
 	}
 
     // RULE: CLOSING DELIMITER
     "\"\"\""{ExtendedStringLiteralDelimiter} {
-        int matchedNumHashes = yytext().length() - 3;
-        if (matchedNumHashes == currentExtendedDelimiterLength) {
-            if (!stateStack.isEmpty()) { yybegin(stateStack.pop());}
-		    else {yybegin(INITIAL);}
-            return EXTENDED_MULTILINE_STRING_END;}
-		else {return MULTILINE_STRING_TEXT;}
+        int poundCount = yytext().length() - 3;
+        if (poundCount == currentExtendedDelimiterLength) {
+            if (!stateStack.isEmpty()) {
+		    yybegin(stateStack.pop());
+	    } else {yybegin(INITIAL);}
+            return EXTENDED_MULTILINE_STRING_END;
+	} else {return MULTILINE_STRING_TEXT;}
     }
 
     // RULE: ESCAPED DELIMITER or LITERAL BACKSLASH
-    "\\" {
-        if (currentExtendedDelimiterLength > 0) {
-            boolean hashesMatch = true;
-            for (int i = 0; i < currentExtendedDelimiterLength; i++) {
-                int charN = yyinput();
-                if (charN == YYEOF || (char) charN != '#') {hashesMatch = false;break;}
-			}
-            if (hashesMatch) {
-                int q1 = yyinput();
-                int q2 = yyinput();
-                int q3 = yyinput();
-                if (q1 != YYEOF && (char)q1 == '"' &&
-                    q2 != YYEOF && (char)q2 == '"' &&
-                    q3 != YYEOF && (char)q3 == '"') {}
-				else {}} else {}}
-		return STRING_TEXT;
+    "\\"{ExtendedStringLiteralDelimiter}"\"\"\"" {
+        // Match a backslash, N #, triple quote
+        int poundCount = yytext().length() - 4; // \ + N # + """
+        if (poundCount == currentExtendedDelimiterLength) {
+            return STRING_ESCAPED_SEQUENCE;
+        } else {
+            return MULTILINE_STRING_TEXT;
+        }
     }
+
     // RULE: NESTED MULTILINE COMMENT START
-	"/*" {stateStack.push(yystate());yybegin(MULTILINE_COMMENT);
-		  return MULTILINE_COMMENT_START;}
+	"/*" {
+	      stateStack.push(yystate());
+	      yybegin(MULTILINE_COMMENT);
+	      return MULTILINE_COMMENT_START;
+      }
+
 		// RULE: EXTENDED MULTILINE STRING CONTENT
 	(.|\n)+ {return MULTILINE_STRING_TEXT;}
 		// Fallback (shouldn't be reached, ideally)
