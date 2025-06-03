@@ -557,9 +557,9 @@
   string-literal ::= static-string-literal | interpolated-string-literal
   //string-literal-opening-delimiter → extended-string-literal-delimiter? "
   //string-literal-closing-delimiter → " extended-string-literal-delimiter?
-  static-string-literal ::= singleline-string | multiline-string
-  singleline-string ::= (STRING_START STRING_TEXT* STRING_END)
-  multiline-string ::= (MULTILINE_STRING_START MULTILINE_STRING_TEXT* MULTILINE_STRING_END)
+  private static-string-literal ::= singleline-string | multiline-string
+  private singleline-string ::= (STRING_START STRING_TEXT* STRING_END)
+  private multiline-string ::= (MULTILINE_STRING_START MULTILINE_STRING_TEXT* MULTILINE_STRING_END)
   //multiline-string-literal-opening-delimiter → extended-string-literal-delimiter? """
   //multiline-string-literal-closing-delimiter → """ extended-string-literal-delimiter?
   //extended-string-literal-delimiter → # extended-string-literal-delimiter?
@@ -884,7 +884,6 @@
 
   // GENERAL/SHARED ACROSS STATES
   token QUOTED_IDENTIFIER
-
   token STRING_INTERPOLATION_START
   token STRING_INTERPOLATION_END
 

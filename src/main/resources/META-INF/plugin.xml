@@ -21,8 +21,11 @@
                 patterns="*.swift;*.swiftinterface"
                 hashBangs=""
         />
-        <lang.parserDefinition language="swift" implementationClass="com.makememonad.turbofan.language.swift.SwiftParserDefinition"/>
-        <colorSettingsPage implementation="com.makememonad.turbofan.language.swift.highlighter.SwiftColorSettingsPage"/>
+        <lang.parserDefinition
+                language="swift"
+                implementationClass="com.makememonad.turbofan.language.swift.SwiftParserDefinition"/>
+        <colorSettingsPage
+                implementation="com.makememonad.turbofan.language.swift.highlighter.SwiftColorSettingsPage"/>
         <lang.syntaxHighlighterFactory
                 language="swift"
                 implementationClass="com.makememonad.turbofan.language.swift.highlighter.SwiftSyntaxHighlighterFactory"/>
@@ -31,12 +34,15 @@
         <psi.referenceContributor
                 language="swift"
                 implementation="com.makememonad.turbofan.language.swift.references.SwiftReferenceContributor"/>
+
         <platform.lsp.serverSupportProvider
+                id="swift.lsp.server.support"
                 implementation="com.makememonad.turbofan.language.swift.lsp.SwiftLspServerSupportProvider"/>
+
         <notificationGroup
                 id="TurboFan Notifications"
                 displayType="BALLOON"
-                isLogByDefault="true"/>
+                isLogByDefault="true" bundle="messages.MyBundle" key="notification.group.turbofan.notifications"/>
     </extensions>
 
 </idea-plugin>
