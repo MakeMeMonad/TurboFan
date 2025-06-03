@@ -22,7 +22,11 @@ group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
 // Set the JVM language level used to build the project.
-kotlin { jvmToolchain(21) }
+kotlin { jvmToolchain(jdkVersion = 21) }
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
 
 // Configure project's dependencies
 repositories {
