@@ -40,7 +40,6 @@ class SwiftLspServerDescriptor(
 				// semanticTokens = SemanticTokensWorkspaceCapabilities().apply { refreshSupport = true }
 			}
 			textDocument = TextDocumentClientCapabilities().apply { ->
-				// Don't set semanticTokens here either!
 				synchronization = SynchronizationCapabilities().apply { ->
 					// `dynamicRegistration = false` because the IDE doesn't check dynamically registered capabilities before sending
 					// `didOpen` / `didChange` / `didClose` notifications.
@@ -79,7 +78,6 @@ class SwiftLspServerDescriptor(
 				hover = HoverCapabilities().apply { ->
 					contentFormat = listOf(MarkupKind.MARKDOWN, MarkupKind.PLAINTEXT)
 				}
-				
 				val semanticTokensSupport: LspSemanticTokensSupport? = this@SwiftLspServerDescriptor.lspSemanticTokensSupport
 				if(semanticTokensSupport != null) {
 					semanticTokens = SemanticTokensCapabilities().apply { ->
@@ -97,7 +95,6 @@ class SwiftLspServerDescriptor(
 						}
 					}
 				}
-				
 				publishDiagnostics = PublishDiagnosticsCapabilities().apply { ->
 					versionSupport = true
 					tagSupport = Either.forRight(/* right = */ DiagnosticsTagSupport(/* valueSet = */ listOf(
@@ -122,10 +119,6 @@ class SwiftLspServerDescriptor(
 				this.references = ReferencesCapabilities(/* dynamicRegistration = */ true)
 				this.colorProvider = ColorProviderCapabilities(/* dynamicRegistration = */ true)
 			}
-			
-			
-			
-			
 			this.notebookDocument = null
 			this.window = WindowClientCapabilities().apply { ->
 				this.showMessage = WindowShowMessageRequestCapabilities()
@@ -139,5 +132,6 @@ class SwiftLspServerDescriptor(
 			this.experimental = null
 		}
 	
-	// TODO: After Workspace API implementation, consider need for Overriding WorkspaceClientCapabilities and/or getWorkspaceConfiguration
+	// TODO: After IntelliJ 'Workspace API' stability and implementation,
+	//  consider need for Overriding WorkspaceClientCapabilities and/or getWorkspaceConfiguration
 }
