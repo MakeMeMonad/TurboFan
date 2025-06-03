@@ -1,6 +1,7 @@
 # TurboFan
 
 ![Build](https://github.com/MakeMeMonad/TurboFan/workflows/Build/badge.svg)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/MakeMeMonad/TurboFan?utm_source=oss&utm_medium=github&utm_campaign=MakeMeMonad%2FTurboFan&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 ---
