@@ -9,13 +9,15 @@ import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.lsWidget.LspServerWidgetItem
 import com.makememonad.turbofan.language.swift.SwiftIcons.SwiftFileIcon
 
-final class SwiftLspServerSupportProvider: com.intellij.platform.lsp.api.LspServerSupportProvider {
+class SwiftLspServerSupportProvider: LspServerSupportProvider {
 	
 	override fun fileOpened(project: Project, file: VirtualFile, serverStarter: LspServerSupportProvider.LspServerStarter) {
-		val manager = com.makememonad.turbofan.language.swift.lsp.SwiftLspServerBinaryManager()
-		val lspPath = manager.findSourceKitLsp()
+		val manager = SwiftLspServerBinaryManager()
+		val lspPath: String? = manager.findSourceKitLsp()
 		if(lspPath != null) {
-			serverStarter.ensureServerStarted(SwiftLspServerDescriptor(project, "SourceKit-LSP", lspPath))
+			serverStarter.ensureServerStarted(
+				    descriptor = SwiftLspServerDescriptor(
+						project = project, presentableName = "TurboFan: SourceKit-LSP", lspBinaryPath = lspPath))
 		}
 		else {
 			notifySourceKitNotFound(project)
@@ -30,11 +32,9 @@ final class SwiftLspServerSupportProvider: com.intellij.platform.lsp.api.LspServ
 	// TODO: Add a link to the notification for quick access to the Swift toolchain download page, preferably for the host os/arch...
 	// TODO: Implement settings page for user-configured path, and link to it from notification...
 	fun notifySourceKitNotFound(project: Project? = null) {
-		NotificationGroupManager
-			    .getInstance()
-			    .getNotificationGroup("TurboFan Notifications")
-			    .createNotification(
-					"Could not find SourceKit-LSP", "Please install the Swift toolchain or provide the path in settings.", NotificationType.ERROR)
-			    .notify(project)
+		NotificationGroupManager.getInstance().getNotificationGroup(/* groupId = */ "TurboFan Notifications").createNotification(
+					title = "Could not find SourceKit-LSP",
+					content = "Please install the Swift toolchain or provide the path in settings.",
+					type = NotificationType.ERROR).notify(project)
 	}
 }
