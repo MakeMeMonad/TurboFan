@@ -657,7 +657,7 @@ Underscore = "_"
 	}
 		// RULE: CLOSING DELIMITER
 	"\"" {yybegin(stateStack.pop());return STRING_END;}
-		// RULES: ESCAPE SEQuences, PROHIBITED NEWLINES, STRING CONTENT
+		// RULES: ESCAPE SEQUENCES, PROHIBITED NEWLINES, STRING CONTENT
 	{EscapedCharacter} {return STRING_ESCAPED_SEQUENCE;}
 	[\u000A\u000D] {return BAD_CHARACTER;}
 	{QuotedText} {return STRING_TEXT;}

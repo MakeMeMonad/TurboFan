@@ -20,7 +20,7 @@ class SwiftLspServerSupportProvider: LspServerSupportProvider {
 						project = project, presentableName = "TurboFan: SourceKit-LSP", lspBinaryPath = lspPath))
 		}
 		else {
-			notifySourceKitNotFound(project)
+			this.notifySourceKitNotFound(project)
 		}
 	}
 	
@@ -32,9 +32,13 @@ class SwiftLspServerSupportProvider: LspServerSupportProvider {
 	// TODO: Add a link to the notification for quick access to the Swift toolchain download page, preferably for the host os/arch...
 	// TODO: Implement settings page for user-configured path, and link to it from notification...
 	fun notifySourceKitNotFound(project: Project? = null) {
-		NotificationGroupManager.getInstance().getNotificationGroup(/* groupId = */ "TurboFan Notifications").createNotification(
+		NotificationGroupManager
+			    .getInstance()
+			    .getNotificationGroup(/* groupId = */ "TurboFan Notifications")
+			    .createNotification(
 					title = "Could not find SourceKit-LSP",
 					content = "Please install the Swift toolchain or provide the path in settings.",
-					type = NotificationType.ERROR).notify(project)
+					type = NotificationType.ERROR)
+			    .notify(project)
 	}
 }
