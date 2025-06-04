@@ -124,23 +124,24 @@ object SwiftTokenSets {
 		get() = orSet(/* ...sets = */ this.TS_REGEXP, this.TS_BOOLEANS, this.TS_NILS)
 	val TS_ALL_INTEGERS: TokenSet = create(/* ...types = */ INTEGER_LITERAL, HEX_LITERAL, OCTAL_LITERAL, BINARY_LITERAL)
 	val TS_ALL_FLOATS: TokenSet = create(/* ...types = */ HEX_FLOATING_POINT_LITERAL, DECIMAL_FLOATING_POINT_LITERAL)
-	val TS_SINGLELINE_STRINGS: TokenSet = create(/* ...types = */ STRING_START, STRING_TEXT, STRING_END)
-	val TS_MULTILINE_STRINGS: TokenSet = create(/* ...types = */ MULTILINE_STRING_START, MULTILINE_STRING_TEXT, MULTILINE_STRING_END)
+	val TS_SINGLELINE_STRINGS: TokenSet = create(/* ...types = */ EXTENDED_STRING_START, STRING_START, STRING_TEXT, STRING_END, EXTENDED_STRING_END)
+	val TS_MULTILINE_STRINGS: TokenSet =
+		    create(/* ...types = */ EXTENDED_MULTILINE_STRING_START, MULTILINE_STRING_START, MULTILINE_STRING_TEXT, MULTILINE_STRING_END, EXTENDED_MULTILINE_STRING_END)
 	val TS_SINGLELINE_COMMENTS: TokenSet = create(/* ...types = */ SINGLELINE_COMMENT, COMMENT_TEXT)
 	val TS_MULTILINE_COMMENTS: TokenSet = create(/* ...types = */ MULTILINE_COMMENT_START, MULTILINE_COMMENT_TEXT, MULTILINE_COMMENT_END)
 	val TS_REGEXP: TokenSet = create(/* ...types = */ REGULAR_EXPRESSION_LITERAL)
 	val TS_BOOLEANS: TokenSet = create(/* ...types = */ KW_TRUE, KW_FALSE)
 	val TS_NILS: TokenSet = create(/* ...types = */ KW_NIL)
+	val TS_BRACES: TokenSet = create(/* ...types = */ RBRACE, LBRACE)
+	val TS_DOT: TokenSet = create(/* ...types = */ DOT)
+	val TS_SEMICOLON: TokenSet = create(/* ...types = */ SEMICOLON)
+	val TS_PARENS: TokenSet = create(/* ...types = */ RPAREN, LPAREN)
+	val TS_BRACKETS: TokenSet = create(/* ...types = */ RBRACKET, LBRACKET)
+	val TS_VALID_STRING_ESCAPE: TokenSet = create(/* ...types = */ STRING_ESCAPED_SEQUENCE, MULTILINE_STRING_ESCAPED_SEQUENCE, MULTILINE_STRING_ESCAPED_NEWLINE)
 	
-	// TODO: Add remaining sets corresponding to defaults in DefaultLanguageHighlighterColors.java
-	// Well, the ones that I can use with the Highlighting Lexer... Write a psi visitor or annotator for the rest...
+	// TODO: Still need to add a set for Doc comments, depends on adding .flex rule to tokenize them... maybe grammar instead given they're contextual...
 	
-	// Doc comment
-	//Braces
-	// Dot
-	// Semicolon
-	// Parens
-	// Brackets
+	// TODO: Need to make a highlighting visitor or annotator for these...
 	// Label
 	// Constant
 	// Local Var
@@ -157,8 +158,7 @@ object SwiftTokenSets {
 	// instance field
 	// static method
 	// static field
-	// other stuff...
-	// valid string escape
+	
 	// invalid string escape
-	// other stuff...
+	
 }

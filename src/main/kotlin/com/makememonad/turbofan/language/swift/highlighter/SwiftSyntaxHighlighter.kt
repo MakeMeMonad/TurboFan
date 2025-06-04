@@ -23,8 +23,13 @@ class SwiftSyntaxHighlighter: SyntaxHighlighterBase() { companion object {
 		    arrayOf(TextAttributesKey.createTextAttributesKey("SWIFT_MULTILINE_COMMENT", DefaultLanguageHighlighterColors.BLOCK_COMMENT))
 	
 	// TODO: Add the rest of the categories with known default TextAttributeKeys in IntelliJ
-	
-	// ...repeat for COMMENT, KEYWORD, IDENTIFIER, OPERATOR, NUMBER...
+	val BRACES_KEYS: Array<TextAttributesKey> = arrayOf(TextAttributesKey.createTextAttributesKey("SWIFT_BRACES", DefaultLanguageHighlighterColors.BRACES))
+	val DOT_KEYS: Array<TextAttributesKey> = arrayOf(TextAttributesKey.createTextAttributesKey("SWIFT_DOT", DefaultLanguageHighlighterColors.DOT))
+	val SEMICOLON_KEYS: Array<TextAttributesKey> = arrayOf(TextAttributesKey.createTextAttributesKey("SWIFT_SEMICOLON", DefaultLanguageHighlighterColors.SEMICOLON))
+	val PARENS_KEYS: Array<TextAttributesKey> = arrayOf(TextAttributesKey.createTextAttributesKey("SWIFT_PARENS", DefaultLanguageHighlighterColors.PARENTHESES))
+	val BRACKETS_KEYS: Array<TextAttributesKey> = arrayOf(TextAttributesKey.createTextAttributesKey("SWIFT_BRACKETS", DefaultLanguageHighlighterColors.BRACKETS))
+	val VALID_STRING_ESCAPE_KEYS: Array<TextAttributesKey> =
+		    arrayOf(TextAttributesKey.createTextAttributesKey("SWIFT_VALID_STRING_ESCAPE", DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE))
 	val EMPTY_KEYS: Array<TextAttributesKey> = emptyArray<TextAttributesKey>()
 }
 	
@@ -38,6 +43,12 @@ class SwiftSyntaxHighlighter: SyntaxHighlighterBase() { companion object {
 		SwiftTokenSets.TS_ALL_OPERATORS.contains(tokenType)       -> ALL_OPERATOR_KEYS
 		SwiftTokenSets.TS_SINGLELINE_COMMENTS.contains(tokenType) -> SINGLELINE_COMMENT_KEYS
 		SwiftTokenSets.TS_MULTILINE_COMMENTS.contains(tokenType)  -> MULTILINE_COMMENT_KEYS
+		SwiftTokenSets.TS_BRACES.contains(tokenType)              -> BRACES_KEYS
+		SwiftTokenSets.TS_DOT.contains(tokenType)                 -> DOT_KEYS
+		SwiftTokenSets.TS_SEMICOLON.contains(tokenType)           -> SEMICOLON_KEYS
+		SwiftTokenSets.TS_PARENS.contains(tokenType)              -> PARENS_KEYS
+		SwiftTokenSets.TS_BRACKETS.contains(tokenType)            -> BRACKETS_KEYS
+		SwiftTokenSets.TS_VALID_STRING_ESCAPE.contains(tokenType) -> VALID_STRING_ESCAPE_KEYS
 		else                                                      -> EMPTY_KEYS
 	}
 }

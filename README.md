@@ -18,13 +18,12 @@ Todo: Write this up next.
 
 ## Table of Contents
 
-#### Information about our intentions, motivations, and decisions thus fa:.
+#### Information about the intentions, motivations, and decisions behind TurboFan.
 
 - [Who?](#who-built-is-building-turbofan)
 - [What?](#what-is-turbofan)
 - [Why TurboFan?](#why-build-turbofan-motivations)
-- [Why Not *SomeOtherThing*?](#why-not-build-something-else-alternatives)
-- [Why FOSS?](#why-open-source)
+- [Why FOSS?](#why-build-in-public-why-open-source)
 
 #### Information about the TurboFan project and its development:
 
@@ -54,7 +53,7 @@ Todo: Write this up next.
 
 ## Who ~~Built~~ Is Building TurboFan?
 
-TurboFan is built by Gale, a former hydromechanical repair technician and indie developer passionate about
+TurboFan is built by Gale, a former repair technician and noob indie developer. Gale is passionate about
 accessibility, modern developer tooling, and using the advances of machine learning for good.
 
 TurboFan is made possible with support and inspiration from the open source community.
@@ -68,50 +67,64 @@ full-featured support for the Swift language and toolchain to JetBrains editor p
 Inspired by the legacy of AppCode, and the growing, cross-platform Swift community, TurboFan’s goal is to make Swift
 development accessible, customizable, and fun for any and every developer interested in coding with Swift.
 
-Most of all, TurboFan is a response to the inadequacy of Xcode and VSCode to meet the needs of large swaths of modern
-developers, including disabled devs, and anyone who just wants to build awesome tools for their IDE and the language
-they enjoy most.
+Most of all, TurboFan is a response to the inadequacy of Xcode and VSCode to meet the needs of many
+developers, including disabled devs, and anyone who just wants to build awesome tools for their preferred IDE and
+language.
 
 ## Why Build Turbofan? (Motivations)
 
+#### And why not just build something else?
+
 I started TurboFan after a long search for an accessible, extensible, and genuinely usable Swift IDE outside of Xcode.
-As a disabled indie developer with endless ideas for creating better dev tools, I hit wall after wall as I spent the
-past six months finally learning how to program. From my first experiences with Xcode back in January, it was clear to
+As a disabled indie developer with endless ideas for creating better dev tools, I hit wall after wall spending the
+past six months learning how to program. From my first experiences with Xcode back in January, it was clear to
 me that this would be yet another long journey of building my own solutions to structural problems.
 
 Xcode and macOS may have class-leading accessibility, and Apple may delight in raising that bar year after year, but
 that same bar is still regularly used for limbo competitions. It is not enough, and I'm not the type to settle for "Hey,
-it's only half broken, so it's fine!" as an answer. To add insult to injury, Xcode has been locked down since version 8,
-and it's clear that the Alcatraz days are long gone. Fixing things myself would not be possible with the half-baked
-alternatives that Apple approves of, even with the myriad open-source tools the Swift team has developed. I'd love to
-build a dozen SwiftPM accessibility and productivity enhancements that Apple seems perennially allergic to even
-considering. If they ever give developers the proper endpoints to do so, I remain intent on doing just that.
+it's only half broken, so it's fine!" as an answer. To add insult to injury, Apple locked down Xcode in version 8, and
+it's clear that the Alcatraz days won't be coming back. 'XCSourceEditorExtension' was intertesting to explore, but it's
+limitations prevented most of the use-cases I had in mind. The need to pipe data over `XPC` serialized to
+`NSSecureCoding` further complicated my attempts at *creative* usages of the only official path to an Xcode "plugin".
+SwiftPM BuiltTool, XcodeBuildTool, and Command plugins are a more recent, and slightly more useful, development.
+Unfortunately, the `BuildTool` options are just that, build tools. They run during a build, full stop. The command tools
+are hobbled in similar ways to`XCSourceEditorExtension`, but will less Mach, Objective-C, and the inane type
+restrictions of `NSSecureCoding`. Better? Yes. Good? No. After shelving or throwing away more projects than I care to
+admit over about 4 months of learning Swift and the Apple platform, I reached an unfortunate realization. Fixing things
+myself would scarcely be possible with the half-baked alternatives that Apple approves of, even with the myriad
+open-source tools the Swift team has developed. I'd love to just sit down and build a dozen SwiftPM/Xcode accessibility
+and productivity enhancements right now. All the things that Apple seems perennially allergic to even considering. If
+they ever give developers the access or proper endpoints to do so, I remain intent on doing just that.
 
-AppCode, the discontinued IDE that I wish JetBrains had continued supporting, was "sunset" years before I knew what a
-.jar or plist was, along with the closed-source plugin that used to bring Swift to CLion as well.
+AppCode, the discontinued IDE that I wish JetBrains had kept developing, was "sunset" years before I knew what a
+.jar or plist was. The first-party closed-source plugin that used to bring Swift to CLion met a similar fate.
 
 The only active attempt to replicate that plugin I could find was also closed-source and soon-to-be-paid via
 subscription model. Two years in the making, it appears to have a ways to go before reaching the levels of integration
 with the underlying IntelliJ Platform that I need and intend to achieve with TurboFan. While I would've much rather
 joined in contributing to an existing project to improve it, this one was vocally opposed to outside contributions.
 
-Disappointed yet still undeterred, I resolved to build TurboFan on my own. Thus began a month-long journey into the wide
-worlds of Java, Kotlin, IntelliJ, JFlex, BNF, and a whole new universe of unreadable, inaccessible, or plain nonexistant
-documentation. And what a month it has been. This endeavor has been a massive learning experience that I'm very grateful
-for.
+Disappointed, yet undeterred, I resolved to begin building a solution myself. Thus began a month-long journey into
+the wide worlds of Java, Kotlin, IntelliJ, JFlex, BNF. This included a much more familiar journey into the vast sea of
+unreadable, inaccessible, or non-existent developer documentation for *everything*. Well, with the notable exception of
+Java, which has a very well-written manual available freely online, all in one place. Shout out to Oracle for the
+excellent resources at [Dev.Java](https://dev.java/learn/). These were a breath of fresh air for someone like myself.
+I'd grown accustomed to trawling through the typical two-hundred lines of uncommented and overloaded function signatures
+in a generated header that Apple calls "developer documentation." I'd almost forgotten what a good set of docs was like
+to read. Well, *try* to read. Apple's shockingly bad TTS system continues to be the bane of my existance. It's actually
+broken in new and exciting ways just since I started this project. I'll save the details on that for a proper blog/rant
+about the state of Apple's flailing accessibility efforts.
 
-While I may have bit off just a bit more than I could chew at first, the bevy of new skills that I had to learn are sure
-to be worth it in the end. Even at this as-yet-early stage, I feel a new level of confidence in my ability to work with
-complex systems and solve problems effectively in new domains with new languages. This has been a
-highly rewarding experience, one that's still only just beginning, and I’m beyond eager to share what I’ve learned, to
-learn from the wider community in return, and, hopefully, to build a community around this nascent effort to bring
-proper accessibility and full extensibility back to the Swift and Apple dev communities.
+While I may have bitten off more than I could chew at first, the bevy of new skills I've learned along the way are sure
+to be worth it in the end. Even at this early stage, I feel a new level of confidence in my ability to work with complex
+systems. Solving difficult problems effectively in new domains with new languages is challenging but exciting, though a
+bit frustrating as the only option available. Being boxed-in is not my favorite circumstance, but it's never stopped me.
+All things considered, this has been a highly rewarding experience, one that's still only just beginning, and I’m beyond
+eager to share what I’ve learned, to learn from the wider community in return, and, hopefully, to build a community
+around this nascent effort to bring proper accessibility and full extensibility back to the Swift and Apple dev
+communities.
 
-## Why Not Build Something Else? (Alternatives)
-
-// TODO: Write this soon.
-
-## Why Open Source?
+## Why Build in Public? Why Open Source?
 
 // TODO: Rewrite this soon.
 
@@ -127,7 +140,9 @@ this idea: whether you want to contribute code, share feedback, ask questions, o
 #### Active work and near-term plans:
 
 - [x] Proper handling of extended delimiters in Swift string literals.
-- [ ] Complete implementation of SyntaxHighlighting via HighlightingLexer.
+- [x] Complete implementation of lexer-based *syntactic* highlighting via HighlightingLexer.
+- [ ] Fix a few more lexing(a.k.a. tokenizing) (.flex) and parsing (.bnf) bugs.
+- [ ] Implement post-parser *semantic* highlighting via PsiElement tree-walking visitor/annotator setup
 - [ ] Finish improving initial documentation.
 - [ ] Complete the refactoring of README.md
 - [ ] Release: Alpha && Marketplace Early Access
